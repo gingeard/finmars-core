@@ -4,6 +4,7 @@ import copy
 import datetime
 import logging
 from datetime import timedelta
+from typing import Union
 
 import pandas as pd
 
@@ -19,22 +20,20 @@ from poms_app import settings
 _l = logging.getLogger("poms.common")
 
 VALID_FREQUENCY = {"D", "W", "M", "Q", "Y", "C"}
-
 FORWARD = 1
 
 calc_shift_date_map = {
-    "D": lambda date: pd.Timestamp(date) - pd.offsets.Day(0),
-    "W": lambda date: pd.Timestamp(date) - pd.offsets.Week(weekday=0),
-    "M": lambda date: pd.Timestamp(date) - pd.offsets.MonthBegin(1),
-    "Q": lambda date: pd.Timestamp(date) - pd.offsets.QuarterBegin(startingMonth=1),
-    "Y": lambda date: pd.Timestamp(date) - pd.offsets.YearBegin(1),
-    "ED": lambda date: pd.Timestamp(date) + pd.offsets.Day(0),
-    "EW": lambda date: pd.Timestamp(date) + pd.DateOffset(days=6) if date.weekday() != 6 else date,
-    "EM": lambda date: pd.Timestamp(date) + pd.offsets.MonthEnd(0),
-    "EQ": lambda date: pd.Timestamp(date) + pd.offsets.QuarterEnd(startingMonth=3),
-    "EY": lambda date: pd.Timestamp(date) + pd.offsets.YearEnd(1),
+    "D": lambda day: pd.Timestamp(day),
+    "W": lambda day: pd.Timestamp(day) - pd.DateOffset(days=day.weekday()),
+    "M": lambda day: pd.Timestamp(day).replace(day=1),
+    "Q": lambda day: pd.Timestamp(f"{day.year}-{((day.month-1)//3)*3+1:02d}-01"),
+    "Y": lambda day: pd.Timestamp(f"{day.year}-01-01"),
+    "ED": lambda day: pd.Timestamp(day),
+    "EW": lambda day: pd.Timestamp(day) - pd.DateOffset(days=day.weekday()) + pd.DateOffset(days=6),
+    "EM": lambda day: (pd.Timestamp(day).replace(day=1) + pd.offsets.MonthEnd(0)),
+    "EQ": lambda day: pd.Timestamp(f"{day.year}-{((day.month-1)//3)*3+3:02d}-01") + pd.offsets.MonthEnd(0),
+    "EY": lambda day: pd.Timestamp(f"{day.year}-12-31"),  # End of year
 }
-
 frequency_map = {
     "D": lambda shift=1: pd.offsets.Day(shift),
     "W": lambda shift=1: pd.offsets.Week(shift),
@@ -439,8 +438,9 @@ def compare_versions(version1, version2):
 
 
 # region Dates
-def is_business_day(day: datetime.date) -> bool:
-    return bool(len(pd.bdate_range(day, day)))
+def is_business_day(date_obj: Union[pd.Timestamp, datetime.date, datetime.datetime]) -> bool:
+    """Check if a date is a business day (Monday=0 to Friday=4)."""
+    return date_obj.weekday() < 5
 
 
 def get_last_business_day(day: datetime.date | str, to_string=False) -> str | datetime.date:
