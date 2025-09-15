@@ -638,18 +638,32 @@ def split_date_range(
     is_only_bday: bool,
 ) -> list[tuple[str]]:
     """
-    :param start_date: Start date in YYYY-MM-DD format.
-    :param end_date: End date in YYYY-MM-DD format.
-    :param frequency: "D" - (dayly) / "W" - (weekly) / "M" - (monthly) /
+    Splits a date range into subperiods with a given frequency.
+    
+    :param start_date: Start date in YYYY-MM-DD format (string) or datetime.date object
+    :param end_date: End date in YYYY-MM-DD format (string) or datetime.date object
+    :param frequency: "D" - (daily) / "W" - (weekly) / "M" - (monthly) /
     "Q" - (quarterly) / "Y" - (yearly) / "C" - (custom - without changes).
     :param is_only_bday: Whether to adjust the dates to business days.
-    :return: A list of tuples[str], each containing the start and end of a frequency.
+    :return: A list of string tuples, each containing the start and end of a period.
     """
+    # Validate frequency
+    if frequency not in VALID_FREQUENCY:
+        raise ValueError(f"Invalid frequency '{frequency}'. Valid options: {VALID_FREQUENCY}")
+    
+    # Handle "C" frequency to return always string tuple
     if frequency == "C":
-        return [start_date, end_date]
+        start_str = start_date if isinstance(start_date, str) else start_date.strftime(settings.API_DATE_FORMAT)
+        end_str = end_date if isinstance(end_date, str) else end_date.strftime(settings.API_DATE_FORMAT)
+        return [(start_str, end_str)]
 
     start_date = get_validated_date(start_date)
     end_date = get_validated_date(end_date)
+    
+    # Validate date range
+    if start_date > end_date:
+        raise ValueError(f"start_date ({start_date}) must be <= end_date ({end_date})")
+
     freq_start = frequency
     freq_end = f"E{frequency}"
 
