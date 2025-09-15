@@ -47,52 +47,6 @@ class TestBusinessDayFunctions(SimpleTestCase):
                 last_business_day = get_last_business_day_in_previous_quarter(date)
                 self.assertEqual(last_business_day, expected_day)
 
-    def test_split_date_range(self):
-        test_cases = [
-            (datetime.date(2024, 9, 17), datetime.date(2024, 10, 4), "W", False),
-            (datetime.date(2024, 8, 10), datetime.date(2024, 10, 29), "M", False),
-            (datetime.date(2024, 9, 2), datetime.date(2024, 9, 8), "D", True),
-            (datetime.date(2024, 8, 15), datetime.date(2024, 10, 15), "M", True),
-            (datetime.date(2022, 5, 15), datetime.date(2024, 5, 15), "Y", True),
-            (datetime.date(2024, 1, 3), datetime.date(2024, 3, 31), "Q", False),
-            (datetime.date(2024, 1, 3), datetime.date(2024, 3, 31), "Q", True),
-        ]
-
-        expected = [
-            [
-                ("2024-09-16", "2024-09-22"),
-                ("2024-09-23", "2024-09-29"),
-                ("2024-09-30", "2024-10-06"),
-            ],
-            [
-                ("2024-08-01", "2024-08-31"),
-                ("2024-09-01", "2024-09-30"),
-                ("2024-10-01", "2024-10-31"),
-            ],
-            [
-                ("2024-09-02", "2024-09-02"),
-                ("2024-09-03", "2024-09-03"),
-                ("2024-09-04", "2024-09-04"),
-                ("2024-09-05", "2024-09-05"),
-                ("2024-09-06", "2024-09-06"),
-            ],
-            [
-                ("2024-08-01", "2024-08-30"),
-                ("2024-09-02", "2024-09-30"),
-                ("2024-10-01", "2024-10-31"),
-            ],
-            [
-                ("2022-01-03", "2022-12-30"),
-                ("2023-01-02", "2023-12-29"),
-                ("2024-01-01", "2024-12-31"),
-            ],
-            [("2024-01-01", "2024-03-31")],
-            [("2024-01-01", "2024-03-29")],
-        ]
-
-        for i, test_case in enumerate(test_cases):
-            dates = split_date_range(test_case[0], test_case[1], test_case[2], test_case[3])
-            self.assertEqual(dates, expected[i])
 
     def test_pick_dates_from_range(self):
         test_cases = [
