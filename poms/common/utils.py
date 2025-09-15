@@ -660,6 +660,12 @@ def split_date_range(
     start_date = get_validated_date(start_date)
     end_date = get_validated_date(end_date)
 
+    # Preserve original requested range for overlap filtering
+    original_start_date = start_date
+    original_end_date = end_date
+    ts_range_start = pd.Timestamp(original_start_date)
+    ts_range_end = pd.Timestamp(original_end_date)
+
     # Validate date range
     if start_date > end_date:
         raise ValueError(f"start_date ({start_date}) must be <= end_date ({end_date})")
@@ -679,6 +685,10 @@ def split_date_range(
                 continue
             sd = shift_to_bday(sd, 1)  # noqa: PLW2901
             ed = shift_to_bday(ed, -1)
+
+        # Skip periods that do not overlap the originally requested range
+        if ed < ts_range_start or sd > ts_range_end:
+            continue
 
         sd_str = str(sd.strftime(settings.API_DATE_FORMAT))
         ed_str = str(ed.strftime(settings.API_DATE_FORMAT))
