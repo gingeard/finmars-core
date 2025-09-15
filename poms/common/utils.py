@@ -112,10 +112,6 @@ except AttributeError:
             return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
-def iszero(v):
-    return isclose(v, 0.0)
-
-
 class sfloat(float):
     def __truediv__(self, other):
         # print('__truediv__: self=%s, other=%s' % (self, other))
