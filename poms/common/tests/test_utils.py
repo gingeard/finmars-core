@@ -9,7 +9,6 @@ from poms.common.utils import (
     get_last_business_day_of_previous_year,
     get_list_of_dates_between_two_dates,
     pick_dates_from_range,
-    split_date_range,
 )
 
 
@@ -46,7 +45,6 @@ class TestBusinessDayFunctions(SimpleTestCase):
             with self.subTest(date=date):
                 last_business_day = get_last_business_day_in_previous_quarter(date)
                 self.assertEqual(last_business_day, expected_day)
-
 
     def test_pick_dates_from_range(self):
         test_cases = [

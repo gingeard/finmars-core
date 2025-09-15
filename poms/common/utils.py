@@ -639,7 +639,7 @@ def split_date_range(
 ) -> list[tuple[str]]:
     """
     Splits a date range into subperiods with a given frequency.
-    
+
     :param start_date: Start date in YYYY-MM-DD format (string) or datetime.date object
     :param end_date: End date in YYYY-MM-DD format (string) or datetime.date object
     :param frequency: "D" - (daily) / "W" - (weekly) / "M" - (monthly) /
@@ -650,7 +650,7 @@ def split_date_range(
     # Validate frequency
     if frequency not in VALID_FREQUENCY:
         raise ValueError(f"Invalid frequency '{frequency}'. Valid options: {VALID_FREQUENCY}")
-    
+
     # Handle "C" frequency to return always list with one tuple
     if frequency == "C":
         start_str = start_date if isinstance(start_date, str) else start_date.strftime(settings.API_DATE_FORMAT)
@@ -659,7 +659,7 @@ def split_date_range(
 
     start_date = get_validated_date(start_date)
     end_date = get_validated_date(end_date)
-    
+
     # Validate date range
     if start_date > end_date:
         raise ValueError(f"start_date ({start_date}) must be <= end_date ({end_date})")
