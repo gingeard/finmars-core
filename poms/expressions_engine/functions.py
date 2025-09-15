@@ -7,6 +7,7 @@ import random
 import re
 import traceback
 import uuid
+from math import isclose
 from typing import Optional
 
 from django.contrib.contenttypes.models import ContentType
@@ -19,7 +20,6 @@ from pandas.tseries.offsets import BDay, BMonthEnd, BQuarterEnd, BYearEnd
 from poms.common.utils import (
     date_now,
     get_list_of_dates_between_two_dates,
-    isclose,
     calculate_period_date,
 )
 from poms.expressions_engine.exceptions import ExpressionEvalError, InvalidExpression

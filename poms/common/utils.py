@@ -3,9 +3,7 @@ import contextlib
 import copy
 import datetime
 import logging
-import math
 from datetime import timedelta
-from http import HTTPStatus
 
 import pandas as pd
 
@@ -15,7 +13,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import connection, router
 from django.utils.timezone import now
 from django.views.generic.dates import timezone_today
-from rest_framework.views import exception_handler
 
 from poms_app import settings
 
@@ -54,10 +51,6 @@ frequency_map = {
 }
 
 
-def force_qs_evaluation(qs):
-    list(qs)
-
-
 def db_class_check_data(model, verbosity, using):
     from django.db import IntegrityError, ProgrammingError
 
@@ -94,22 +87,6 @@ def date_yesterday():
 
 def datetime_now():
     return now()
-
-
-try:
-    isclose = math.isclose
-except AttributeError:
-    try:
-        import numpy
-
-        isclose = numpy.isclose
-    except ImportError:
-        numpy = None
-
-
-        def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-            # TODO: maybe incorrect!
-            return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
 class sfloat(float):
@@ -265,21 +242,6 @@ def get_content_type_by_name(name):
     return ContentType.objects.get(app_label=app_label_title, model=model_title)
 
 
-def convert_name_to_key(name: str) -> str:
-    return name.strip().lower().replace(" ", "_")
-
-
-def check_if_last_day_of_month(to_date: datetime.date) -> bool:
-    """
-    Checks if date is the last day of month
-    :param to_date:
-    :return: bool
-    """
-    delta = datetime.timedelta(days=1)
-    next_day = to_date + delta
-    return to_date.month != next_day.month
-
-
 def get_first_transaction(portfolio_instance) -> object:
     """
     Get first transaction of portfolio
@@ -303,44 +265,6 @@ def str_to_date(d):
         d = datetime.datetime.strptime(d, settings.API_DATE_FORMAT).date()
 
     return d
-
-
-def finmars_exception_handler(exc, context):
-    """Custom API exception handler."""
-
-    # Call REST framework's default exception handler first,
-    # to get the standard error response.
-    response = exception_handler(exc, context)
-
-    if response is not None:
-        # Using the description's of the HTTPStatus class as error message.
-        http_code_to_message = {v.value: v.description for v in HTTPStatus}
-
-        error_payload = {
-            "error": {
-                "url": context["request"].build_absolute_uri(),
-                "status_code": 0,
-                "message": "",
-                "details": [],
-                "datetime": datetime.datetime.strftime(
-                    now(),
-                    f"{settings.API_DATE_FORMAT} %H:%M:%S",
-                ),
-                "realm_code": context["request"].realm_code,
-                "space_code": context["request"].space_code,
-            }
-        }
-
-        status_code = response.status_code
-
-        error = error_payload["error"]
-        error["status_code"] = status_code
-        error["message"] = http_code_to_message[status_code]
-        error["details"] = response.data
-
-        response.data = error_payload
-
-    return response
 
 
 def get_serializer(content_type_key):
@@ -520,10 +444,6 @@ def compare_versions(version1, version2):
         return 1
 
     return 0
-
-
-def is_newer_version(version1, version2):
-    return compare_versions(version1, version2) > 0
 
 
 # region Dates
@@ -927,7 +847,6 @@ def calculate_period_date(
         return input_date.strftime(settings.API_DATE_FORMAT)
 
     frequency = frequency if start else f"E{frequency}"
-
 
     if "W" in frequency:
         input_date = calc_shift_date_map[frequency](input_date)
