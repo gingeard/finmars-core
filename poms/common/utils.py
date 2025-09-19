@@ -742,7 +742,7 @@ def pick_dates_from_range(
     dates = [d.date() for d in dates]
 
     # don't meets conditions
-    if not len(dates):
+    if not dates:
         return []
 
     # pd.date_range - adds dates that fall completely within

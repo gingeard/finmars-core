@@ -1,6 +1,8 @@
-from datetime import datetime, timedelta
 from calendar import monthrange
+from datetime import datetime, timedelta
+
 from django.test import SimpleTestCase
+
 
 def validate_iso_date_format(date_str: str):
     """
@@ -18,6 +20,7 @@ def validate_iso_date_format(date_str: str):
     except (TypeError, ValueError) as e:
         return "error", f"date ({date_str}) must be string type ISO format: {e}", None
 
+
 def adjust_date(date: datetime, comparison_date: datetime = None, adjustment_type: str = None) -> datetime:
     """
     Adjusts the date based on the given adjustment type.
@@ -30,21 +33,22 @@ def adjust_date(date: datetime, comparison_date: datetime = None, adjustment_typ
     Returns:
     datetime: The adjusted date.
     """
-    if adjustment_type == 'forward' and comparison_date:
+    if adjustment_type == "forward" and comparison_date:
         return max(date, comparison_date)
-    elif adjustment_type == 'backward' and comparison_date:
+    elif adjustment_type == "backward" and comparison_date:
         return min(date, comparison_date)
-    elif adjustment_type == 'business_day_forward':
+    elif adjustment_type == "business_day_forward":
         if date.weekday() == 5:  # Saturday
             date += timedelta(days=2)
         elif date.weekday() == 6:  # Sunday
             date += timedelta(days=1)
-    elif adjustment_type == 'business_day_back':
+    elif adjustment_type == "business_day_back":
         if date.weekday() == 5:  # Saturday
             date -= timedelta(days=1)
         elif date.weekday() == 6:  # Sunday
             date -= timedelta(days=2)
     return date
+
 
 def adjust_dates(
     start_date: datetime,
@@ -52,7 +56,7 @@ def adjust_dates(
     if_date_adjust_to_user_range: bool,
     if_use_business_day: bool,
     user_start_date: datetime = None,
-    user_end_date: datetime = None
+    user_end_date: datetime = None,
 ) -> tuple:
     """
     Adjusts the start and end dates based on user range and business day flags.
@@ -69,46 +73,64 @@ def adjust_dates(
     tuple: The adjusted start and end dates.
     """
     if if_date_adjust_to_user_range:
-        start_date = adjust_date(start_date, user_start_date, 'forward')
-        end_date = adjust_date(end_date, user_end_date, 'backward')
+        start_date = adjust_date(start_date, user_start_date, "forward")
+        end_date = adjust_date(end_date, user_end_date, "backward")
 
     if if_use_business_day:
-        start_date = adjust_date(start_date, adjustment_type='business_day_forward')
-        end_date = adjust_date(end_date, adjustment_type='business_day_back')
+        start_date = adjust_date(start_date, adjustment_type="business_day_forward")
+        end_date = adjust_date(end_date, adjustment_type="business_day_back")
 
     return start_date, end_date
 
-def get_daily_range(current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool):
-    current_date, _ = adjust_dates(current_date, date_to, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to)
+
+def get_daily_range(
+    current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool
+):
+    current_date, _ = adjust_dates(
+        current_date, date_to, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to
+    )
     next_date = current_date + timedelta(days=1)
     return (
         current_date.strftime("%Y-%m-%d"),
         current_date.strftime("%Y-%m-%d"),
     ), next_date
 
-def get_weekly_range(current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool):
+
+def get_weekly_range(
+    current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool
+):
     week_start = current_date - timedelta(days=current_date.weekday())
     week_end = week_start + timedelta(days=6)
     next_date = week_end + timedelta(days=1)
 
-    week_start, week_end = adjust_dates(week_start, week_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to)
+    week_start, week_end = adjust_dates(
+        week_start, week_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to
+    )
 
     return (week_start.strftime("%Y-%m-%d"), week_end.strftime("%Y-%m-%d")), next_date
 
-def get_monthly_range(current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool):
+
+def get_monthly_range(
+    current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool
+):
     _, last_day = monthrange(current_date.year, current_date.month)
     month_start = current_date.replace(day=1)
     month_end = current_date.replace(day=last_day)
     next_month_start = (month_end + timedelta(days=1)).replace(day=1)
 
-    month_start, month_end = adjust_dates(month_start, month_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to)
+    month_start, month_end = adjust_dates(
+        month_start, month_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to
+    )
 
     return (
         month_start.strftime("%Y-%m-%d"),
         month_end.strftime("%Y-%m-%d"),
     ), next_month_start
 
-def get_quarterly_range(current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool):
+
+def get_quarterly_range(
+    current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool
+):
     quarter_start_month = (current_date.month - 1) // 3 * 3 + 1
     quarter_start = datetime(current_date.year, quarter_start_month, 1)
     if quarter_start_month == 1:
@@ -124,14 +146,19 @@ def get_quarterly_range(current_date: datetime, date_to: datetime, if_date_adjus
 
     next_quarter_start = (quarter_end + timedelta(days=1)).replace(day=1)
 
-    quarter_start, quarter_end = adjust_dates(quarter_start, quarter_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to)
+    quarter_start, quarter_end = adjust_dates(
+        quarter_start, quarter_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to
+    )
 
     return (
         quarter_start.strftime("%Y-%m-%d"),
         quarter_end.strftime("%Y-%m-%d"),
     ), next_quarter_start
 
-def get_half_year_range(current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool):
+
+def get_half_year_range(
+    current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool
+):
     if current_date.month <= 6:
         half_year_start = datetime(current_date.year, 1, 1)
         half_year_end = datetime(current_date.year, 6, 30)
@@ -140,27 +167,36 @@ def get_half_year_range(current_date: datetime, date_to: datetime, if_date_adjus
         half_year_end = datetime(current_date.year, 12, 31)
     next_half_year_start = (half_year_end + timedelta(days=1)).replace(day=1)
 
-    half_year_start, half_year_end = adjust_dates(half_year_start, half_year_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to)
+    half_year_start, half_year_end = adjust_dates(
+        half_year_start, half_year_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to
+    )
 
     return (
         half_year_start.strftime("%Y-%m-%d"),
         half_year_end.strftime("%Y-%m-%d"),
     ), next_half_year_start
 
-def get_yearly_range(current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool):
+
+def get_yearly_range(
+    current_date: datetime, date_to: datetime, if_date_adjust_to_user_range: bool, if_use_business_day: bool
+):
     year_start = datetime(current_date.year, 1, 1)
     year_end = datetime(current_date.year, 12, 31)
     next_year_start = (year_end + timedelta(days=1)).replace(day=1)
 
-    year_start, year_end = adjust_dates(year_start, year_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to)
+    year_start, year_end = adjust_dates(
+        year_start, year_end, if_date_adjust_to_user_range, if_use_business_day, current_date, date_to
+    )
 
     return (
         year_start.strftime("%Y-%m-%d"),
         year_end.strftime("%Y-%m-%d"),
     ), next_year_start
 
+
 def get_custom_range(date_from: datetime, date_to: datetime):
     return [(date_from.strftime("%Y-%m-%d"), date_to.strftime("%Y-%m-%d"))]
+
 
 def split_date_range_list(
     date_from_str: str,
@@ -194,8 +230,8 @@ def split_date_range_list(
         return "error", err_msg, None
 
     if if_use_business_day:
-        date_from_adj = adjust_date(date_from, adjustment_type='business_day_forward')
-        date_to_adj = adjust_date(date_to, adjustment_type='business_day_back')
+        date_from_adj = adjust_date(date_from, adjustment_type="business_day_forward")
+        date_to_adj = adjust_date(date_to, adjustment_type="business_day_back")
 
         if date_from_adj > date_to_adj:
             return (
@@ -252,8 +288,6 @@ def split_date_range_list(
         date_ranges.append(date_range)
 
     return "success", None, date_ranges
-
-
 
 
 class TestSplitDateRangeList(SimpleTestCase):
@@ -386,7 +420,7 @@ class TestSplitDateRangeList(SimpleTestCase):
                 case = {
                     "num": i,
                     "date_from_str": "2024-01-13",  # Saturday
-                    "date_to_str": "2024-01-13",    # Saturday
+                    "date_to_str": "2024-01-13",  # Saturday
                     "period_type": period_type,
                     "if_date_adjust_to_user_range": if_date_adjust_to_user_range,
                     "if_use_business_day": True,
@@ -437,10 +471,11 @@ class TestSplitDateRangeList(SimpleTestCase):
                 status, msg, res = self._run_case(case)
                 self.assertEqual(status, "success")
                 self.assertIsNone(msg)
-                self.assertEqual(res, case["res"]) 
+                self.assertEqual(res, case["res"])
 
 
 if __name__ == "__main__":
+
     def split_date_range_list_test_check(test_cases: list[dict]):
         for test_case in test_cases:
             num = test_case["num"]
@@ -460,12 +495,14 @@ if __name__ == "__main__":
             # Removed incorrect reversal; cause results are already in ascending order
             # if isinstance(res, list):
             #     res = res[::-1]
-            assert (
-                res == test_case["res"]
-            ), f"\ntest_case num {num}\ntest_case date_from_str: {date_from_str}\ntest_case date_to_str: {date_to_str}\ntest_case period_type: {period_type}\ntest_case if_date_adjust_to_user_range: {if_date_adjust_to_user_range}\ntest_case if_use_business_day: {if_use_business_day}\nres: {res}\ntest_case res: {test_case['res']}"
+            assert res == test_case["res"], (
+                f"\ntest_case num {num}\ntest_case date_from_str: {date_from_str}\ntest_case date_to_str: {date_to_str}\ntest_case period_type: {period_type}\ntest_case if_date_adjust_to_user_range: {if_date_adjust_to_user_range}\ntest_case if_use_business_day: {if_use_business_day}\nres: {res}\ntest_case res: {test_case['res']}"
+            )
 
 
     print("starting split_date_range_list_tests_generate_if_no_date_to")
+
+
     def split_date_range_list_tests_generate_if_no_date_to():
         cases_if_date_to_earlier = []
         period_types = [
@@ -499,8 +536,9 @@ if __name__ == "__main__":
 
     split_date_range_list_test_check(split_date_range_list_tests_generate_if_no_date_to())
 
-
     print("starting split_date_range_list_tests_generate_if_no_date_from")
+
+
     def split_date_range_list_tests_generate_if_no_date_from():
         cases_if_date_to_earlier = []
         period_types = [
@@ -535,6 +573,8 @@ if __name__ == "__main__":
     split_date_range_list_test_check(split_date_range_list_tests_generate_if_no_date_from())
 
     print("starting split_date_range_list_tests_generate_if_no_period_type")
+
+
     def split_date_range_list_tests_generate_if_no_period_type():
         cases_if_date_to_earlier = []
         period_types = [
@@ -566,11 +606,11 @@ if __name__ == "__main__":
         return cases_if_date_to_earlier
 
 
-    split_date_range_list_test_check(
-        split_date_range_list_tests_generate_if_no_period_type()
-    )
+    split_date_range_list_test_check(split_date_range_list_tests_generate_if_no_period_type())
 
     print("starting split_date_range_list_tests_generate_if_date_to_earlier")
+
+
     def split_date_range_list_tests_generate_if_date_to_earlier():
         cases_if_date_to_earlier = []
         period_types = [
@@ -602,12 +642,11 @@ if __name__ == "__main__":
         return cases_if_date_to_earlier
 
 
-    split_date_range_list_test_check(
-        split_date_range_list_tests_generate_if_date_to_earlier()
-    )
-
+    split_date_range_list_test_check(split_date_range_list_tests_generate_if_date_to_earlier())
 
     print("starting split_date_range_list_tests_generate_if_fully_in_weekend_business_day")
+
+
     def split_date_range_list_tests_generate_if_fully_in_weekend_business_day():
         cases_if_date_to_earlier = []
         period_types = [
@@ -640,9 +679,7 @@ if __name__ == "__main__":
         return cases_if_date_to_earlier
 
 
-    split_date_range_list_test_check(
-        split_date_range_list_tests_generate_if_fully_in_weekend_business_day()
-    )
+    split_date_range_list_test_check(split_date_range_list_tests_generate_if_fully_in_weekend_business_day())
 
     print("starting daily_test_cases")
     daily_test_cases = [
