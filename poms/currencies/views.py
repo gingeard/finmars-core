@@ -14,7 +14,7 @@ from poms.common.filters import (
     EntitySpecificFilter,
     GroupsAttributeFilter,
     ModelExtMultipleChoiceFilter,
-    NoOpFilter,
+    NoOpFilter, AbstractObjectStateFilter,
 )
 from poms.common.views import AbstractModelViewSet
 from poms.currencies.constants import MAIN_CURRENCIES
@@ -42,7 +42,7 @@ class CurrencyAttributeTypeViewSet(GenericAttributeTypeViewSet):
     permission_classes = GenericAttributeTypeViewSet.permission_classes + []
 
 
-class CurrencyFilterSet(FilterSet):
+class CurrencyFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     is_deleted = django_filters.BooleanFilter()
     user_code = CharFilter()
@@ -55,7 +55,7 @@ class CurrencyFilterSet(FilterSet):
 
     class Meta:
         model = Currency
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
     def query_search(self, queryset, _, value):
         if value:
@@ -190,7 +190,7 @@ class CurrencyViewSet(AbstractModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class CurrencyHistoryFilterSet(FilterSet):
+class CurrencyHistoryFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     date = django_filters.DateFromToRangeFilter()
     currency = ModelExtMultipleChoiceFilter(model=Currency)
@@ -200,7 +200,7 @@ class CurrencyHistoryFilterSet(FilterSet):
 
     class Meta:
         model = CurrencyHistory
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
 
 class CurrencyHistoryViewSet(AbstractModelViewSet):

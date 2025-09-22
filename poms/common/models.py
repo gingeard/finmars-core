@@ -419,7 +419,6 @@ class ObjectStateModel(models.Model):
         null=True,
         blank=True,
         verbose_name=gettext_lazy("origin_initiator_code"),
-        on_delete=models.CASCADE,
         help_text=gettext_lazy("user login (who is responsible for manual/scheduler/api call): john_doe")
     )
 
@@ -428,7 +427,6 @@ class ObjectStateModel(models.Model):
         null=True,
         blank=True,
         verbose_name=gettext_lazy("workflow_module_user_code"),
-        on_delete=models.CASCADE,
         help_text=gettext_lazy("workflow used for the data")
     )
 
@@ -445,7 +443,6 @@ class ObjectStateModel(models.Model):
         null=True,
         blank=True,
         verbose_name=gettext_lazy("workflow_id"),
-        on_delete=models.CASCADE,
         help_text=gettext_lazy("id or uuid")
     )
 
@@ -454,7 +451,6 @@ class ObjectStateModel(models.Model):
         null=True,
         blank=True,
         verbose_name=gettext_lazy("platform_task_id"),
-        on_delete=models.CASCADE,
         help_text=gettext_lazy("platform task id")
     )
 

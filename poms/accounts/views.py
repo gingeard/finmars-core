@@ -14,7 +14,7 @@ from poms.common.filters import (
     CharFilter,
     EntitySpecificFilter,
     GroupsAttributeFilter,
-    NoOpFilter,
+    NoOpFilter, AbstractObjectStateFilter,
 )
 from poms.common.utils import get_list_of_entity_attributes
 from poms.common.views import AbstractModelViewSet
@@ -133,7 +133,7 @@ class AccountClassifierViewSet(GenericClassifierViewSet):
     target_model = Account
 
 
-class AccountFilterSet(FilterSet):
+class AccountFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     is_deleted = django_filters.BooleanFilter()
     user_code = CharFilter()
@@ -146,7 +146,7 @@ class AccountFilterSet(FilterSet):
 
     class Meta:
         model = Account
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
 
 class AccountViewSet(AbstractModelViewSet):

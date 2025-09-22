@@ -17,7 +17,7 @@ from poms.common.filters import (
     EntitySpecificFilter,
     GroupsAttributeFilter,
     ModelExtUserCodeMultipleChoiceFilter,
-    NoOpFilter,
+    NoOpFilter, AbstractObjectStateFilter,
 )
 from poms.common.utils import get_list_of_entity_attributes
 from poms.common.views import AbstractClassModelViewSet, AbstractModelViewSet
@@ -187,7 +187,7 @@ class PortfolioClassifierViewSet(GenericClassifierViewSet):
     target_model = Portfolio
 
 
-class PortfolioFilterSet(FilterSet):
+class PortfolioFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     is_deleted = django_filters.BooleanFilter()
     user_code = CharFilter()
@@ -200,7 +200,7 @@ class PortfolioFilterSet(FilterSet):
 
     class Meta:
         model = Portfolio
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
 
 class PortfolioViewSet(AbstractModelViewSet):

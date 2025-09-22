@@ -31,7 +31,7 @@ from poms.common.filters import (
     EntitySpecificFilter,
     GroupsAttributeFilter,
     ModelExtMultipleChoiceFilter,
-    NoOpFilter,
+    NoOpFilter, AbstractObjectStateFilter,
 )
 from poms.common.jwt import encode_with_jwt
 from poms.common.mixins import UpdateModelMixinExt
@@ -687,7 +687,7 @@ class InstrumentClassifierViewSet(GenericClassifierViewSet):
     target_model = Instrument
 
 
-class InstrumentFilterSet(FilterSet):
+class InstrumentFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     is_deleted = django_filters.BooleanFilter()
     user_code = CharFilter()
@@ -713,7 +713,7 @@ class InstrumentFilterSet(FilterSet):
 
     class Meta:
         model = Instrument
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
 
 class InstrumentViewSet(AbstractModelViewSet):
@@ -1548,7 +1548,7 @@ class InstrumentDatabaseSearchViewSet(APIView):
         return Response(result)
 
 
-class PriceHistoryFilterSet(FilterSet):
+class PriceHistoryFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     instrument = ModelExtMultipleChoiceFilter(model=Instrument, field_name="id")
     pricing_policy = CharFilter(field_name="pricing_policy__user_code", lookup_expr="icontains")
@@ -1558,7 +1558,7 @@ class PriceHistoryFilterSet(FilterSet):
 
     class Meta:
         model = PriceHistory
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
 
 class PriceHistoryViewSet(AbstractModelViewSet):

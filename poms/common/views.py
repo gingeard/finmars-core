@@ -27,7 +27,7 @@ from poms.common.filters import (
     ByIsDeletedFilterBackend,
     ByIsEnabledFilterBackend,
     FinmarsFilterBackend,
-    OrderingPostFilter,
+    OrderingPostFilter, ReferenceIdsParamFilterBackend, PlatformVersionParamFilterBackend,
 )
 from poms.common.grouping_handlers import count_groups, handle_groups
 from poms.common.mixins import (
@@ -146,6 +146,8 @@ class AbstractModelViewSet(
         ByIdFilterBackend,
         ByIsDeletedFilterBackend,
         ByIsEnabledFilterBackend,
+        ReferenceIdsParamFilterBackend, # Object State.reference_ids field
+        PlatformVersionParamFilterBackend, # Object State.platform_version field
         OrderingFilter,
         OrderingPostFilter,
     ]

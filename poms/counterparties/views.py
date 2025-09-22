@@ -9,7 +9,7 @@ from poms.common.filters import (
     CharFilter,
     EntitySpecificFilter,
     GroupsAttributeFilter,
-    NoOpFilter,
+    NoOpFilter, AbstractObjectStateFilter,
 )
 from poms.common.utils import get_list_of_entity_attributes
 from poms.common.views import AbstractModelViewSet
@@ -78,7 +78,7 @@ class CounterpartyGroupViewSet(AbstractModelViewSet):
         items_qs.update(group=default_group)
 
 
-class CounterpartyFilterSet(FilterSet):
+class CounterpartyFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     is_deleted = django_filters.BooleanFilter()
     user_code = CharFilter()
@@ -89,7 +89,7 @@ class CounterpartyFilterSet(FilterSet):
 
     class Meta:
         model = Counterparty
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
     def query_search(self, queryset, _, value):
         if value:
@@ -251,7 +251,7 @@ class ResponsibleGroupViewSet(AbstractModelViewSet):
         items_qs.update(group=default_group)
 
 
-class ResponsibleFilterSet(FilterSet):
+class ResponsibleFilterSet(AbstractObjectStateFilter):
     id = NoOpFilter()
     is_deleted = django_filters.BooleanFilter()
     user_code = CharFilter()
@@ -262,7 +262,7 @@ class ResponsibleFilterSet(FilterSet):
 
     class Meta:
         model = Responsible
-        fields = []
+        fields = AbstractObjectStateFilter.Meta.fields + []
 
 
 class ResponsibleViewSet(AbstractModelViewSet):
