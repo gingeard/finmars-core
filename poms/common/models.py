@@ -316,8 +316,18 @@ class ObjectStateModel(models.Model):
             "this price is 2024-01-01"
         ),
     )
-    source_type = models.CharField(
-        default="manual",
+    origin_initiator_type = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text=gettext_lazy("how action was initiated: manual, scheduler, third_party_push"),
+    )
+
+    origin_manual_entry_point = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        help_text=gettext_lazy("exact_webpage_address (for manual only, including addons address"),
     )
 
     is_manual_locked = models.BooleanField(default=False, help_text="just a flag to disable form on frontend")
@@ -331,7 +341,7 @@ class ObjectStateModel(models.Model):
     provider_user_code = models.CharField(
         max_length=1024,
         null=True,
-        blank=True, # cannot be null # TODO in 1.24
+        blank=True,
         verbose_name=gettext_lazy("provider user code"),
         help_text=gettext_lazy("Unique Identifier for this object in Provider Database"),
     )
@@ -391,21 +401,63 @@ class ObjectStateModel(models.Model):
         help_text=gettext_lazy("Finmars Vault credential's user code used to access provider's data"),
     )
 
-    credential_version_semantic = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        verbose_name=gettext_lazy("credential semantic version"),
-        help_text=gettext_lazy("Finmars Vault credential's version. Semantic Version https://semver.org/"),
+    credential_version_integer = models.PositiveIntegerField(
+        default=1,
+        verbose_name=gettext_lazy("credential integer version"),
+        help_text=gettext_lazy("Finmars Vault credential's version"),
     )
 
-    credential_version_calendar = models.CharField(
+    platform_version = models.JSONField(
+        default=dict,  # will create {}
+        blank=True,
+        verbose_name=gettext_lazy("platform version"),
+        help_text=gettext_lazy("Dictionary of platform services (service: MAJOR.MINOR.PATCH)")
+    )
+
+    origin_initiator_code = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("origin_initiator_code"),
+        on_delete=models.CASCADE,
+        help_text=gettext_lazy("user login (who is responsible for manual/scheduler/api call): john_doe")
+    )
+
+    workflow_module_user_code = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("workflow_module_user_code"),
+        on_delete=models.CASCADE,
+        help_text=gettext_lazy("workflow used for the data")
+    )
+
+    workflow_module_version_semantic = models.CharField(
         max_length=255,
         null=True,
         blank=True,
-        verbose_name=gettext_lazy("credential calendar version"),
-        help_text=gettext_lazy("Finmars Vault credential's version. Calendar Version https://calver.org/"),
+        verbose_name=gettext_lazy("workflow module semantic version"),
+        help_text=gettext_lazy("Semantic Version https://semver.org/"),
     )
+
+    workflow_id = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("workflow_id"),
+        on_delete=models.CASCADE,
+        help_text=gettext_lazy("id or uuid")
+    )
+
+    platform_task_id = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("platform_task_id"),
+        on_delete=models.CASCADE,
+        help_text=gettext_lazy("platform task id")
+    )
+
 
     class Meta:
         abstract = True
