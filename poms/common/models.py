@@ -404,9 +404,7 @@ class ObjectStateModel(models.Model):
         default=dict,  # will create {}
         blank=True,
         verbose_name=gettext_lazy("attributes_extra"),
-        help_text=gettext_lazy(
-            "json-like field for different key-value pairs"
-        ),
+        help_text=gettext_lazy("json-like field for different key-value pairs"),
     )
 
     credential_user_code = models.CharField(
