@@ -192,6 +192,7 @@ class ModelWithObjectStateSerializer(serializers.ModelSerializer):
         self.fields["is_locked"] = serializers.BooleanField(default=True, required=False)
 
         self.fields["reference_ids"] = serializers.JSONField(allow_null=True, required=False)
+        self.fields["attributes_extra"] = serializers.JSONField(allow_null=True, required=False)
 
         self.fields["origin_initiator_type"] = serializers.CharField(allow_null=True, required=False)
         self.fields["origin_manual_entry_point"] = serializers.CharField(allow_null=True, required=False)
