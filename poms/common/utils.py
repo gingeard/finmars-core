@@ -635,7 +635,7 @@ def split_date_range(
     end_date: str | datetime.date,
     frequency: str,
     is_only_bday: bool,
-) -> list[tuple[str]]:
+) -> list[tuple]:
     """
     Splits a date range into subperiods with a given frequency.
 
@@ -652,8 +652,8 @@ def split_date_range(
 
     # Handle "C" frequency to return always list with one tuple
     if frequency == "C":
-        start_str = start_date if isinstance(start_date, str) else start_date.strftime(settings.API_DATE_FORMAT)
-        end_str = end_date if isinstance(end_date, str) else end_date.strftime(settings.API_DATE_FORMAT)
+        start_str: str = start_date if isinstance(start_date, str) else start_date.strftime(settings.API_DATE_FORMAT)
+        end_str: str = end_date if isinstance(end_date, str) else end_date.strftime(settings.API_DATE_FORMAT)
         return [(start_str, end_str)]
 
     start_date = get_validated_date(start_date)
