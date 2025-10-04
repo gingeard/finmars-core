@@ -24,11 +24,13 @@ calc_shift_date_map = {
     "W": lambda day: pd.Timestamp(day) - pd.DateOffset(days=day.weekday()),
     "M": lambda day: pd.Timestamp(day).replace(day=1),
     "Q": lambda day: pd.Timestamp(f"{day.year}-{((day.month - 1) // 3) * 3 + 1:02d}-01"),
+    "HY": lambda day: pd.Timestamp(f"{day.year}-{1 if day.month <= 6 else 7:02d}-01"),
     "Y": lambda day: pd.Timestamp(f"{day.year}-01-01"),
     "ED": lambda day: pd.Timestamp(day),
     "EW": lambda day: pd.Timestamp(day) - pd.DateOffset(days=day.weekday()) + pd.DateOffset(days=6),
     "EM": lambda day: (pd.Timestamp(day).replace(day=1) + pd.offsets.MonthEnd(0)),
     "EQ": lambda day: pd.Timestamp(f"{day.year}-{((day.month - 1) // 3) * 3 + 3:02d}-01") + pd.offsets.MonthEnd(0),
+    "EHY": lambda day: pd.Timestamp(f"{day.year}-{6 if day.month <= 6 else 12:02d}-01") + pd.offsets.MonthEnd(0),
     "EY": lambda day: pd.Timestamp(f"{day.year}-12-31"),
 }
 frequency_map = {
@@ -36,11 +38,13 @@ frequency_map = {
     "W": lambda shift=1: pd.offsets.Week(shift),
     "M": lambda shift=1: pd.offsets.MonthBegin(shift),
     "Q": lambda shift=1: pd.offsets.QuarterBegin(n=shift, startingMonth=1),
+    "HY": lambda shift=1: pd.offsets.MonthBegin(shift * 6),
     "Y": lambda shift=1: pd.offsets.YearBegin(shift),
     "ED": lambda shift=1: pd.offsets.Day(shift),
     "EW": lambda shift=1: pd.offsets.Week(shift),
     "EM": lambda shift=1: pd.offsets.MonthEnd(shift),
     "EQ": lambda shift=1: pd.offsets.QuarterEnd(n=shift, startingMonth=3),
+    "EHY": lambda shift=1: pd.offsets.MonthEnd(shift * 6),
     "EY": lambda shift=1: pd.offsets.YearEnd(shift),
 }
 
