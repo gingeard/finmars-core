@@ -724,7 +724,7 @@ def pick_dates_from_range(
     """
     :param start_date: Start date in YYYY-MM-DD format.
     :param end_date: End date in YYYY-MM-DD format.
-    :param frequency: "D" - (dayly) / "W" - (weekly) / "M" - (monthly) /
+    :param frequency: "D" - (daily) / "W" - (weekly) / "M" - (monthly) /
     "Q" - (quarterly) / "Y" - (yearly) / "C" - (custom - without changes).
     :param is_only_bday: Whether to adjust the dates to business days.
     :param start: The beginning of frequency, if False, then end of frequency.
