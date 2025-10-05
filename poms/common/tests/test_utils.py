@@ -87,7 +87,7 @@ class TestBusinessDayFunctions(SimpleTestCase):
 class TestPicDatesFromRange(SimpleTestCase):
 
     def test_pick_dates_from_range_custom_frequency(self):
-        """Тест для частоты 'C' (custom) - должна возвращать только начальную и конечную даты"""
+        """Test for 'C' (custom) frequency - should return only start and end dates"""
         # Test with date objects
         result = pick_dates_from_range(
             datetime.date(2024, 1, 15),
@@ -119,7 +119,7 @@ class TestPicDatesFromRange(SimpleTestCase):
         self.assertEqual(result, ["2024-01-15", "2024-03-20"])
 
     def test_pick_dates_from_range_invalid_frequency(self):
-        """Тест на невалидную частоту - должен выбросить ValueError"""
+        """Test for invalid frequency - should raise ValueError"""
         with self.assertRaises(ValueError) as context:
             pick_dates_from_range(
                 datetime.date(2024, 1, 1),
@@ -131,7 +131,7 @@ class TestPicDatesFromRange(SimpleTestCase):
         self.assertIn("Invalid frequency", str(context.exception))
 
     def test_pick_dates_from_range_invalid_date_order(self):
-        """Тест на неправильный порядок дат - start_date > end_date"""
+        """Test for invalid date order - start_date > end_date"""
         with self.assertRaises(ValueError) as context:
             pick_dates_from_range(
                 datetime.date(2024, 12, 31),
@@ -143,7 +143,7 @@ class TestPicDatesFromRange(SimpleTestCase):
         self.assertIn("must be less than or equal to", str(context.exception))
 
     def test_pick_dates_from_range_same_date(self):
-        """Тест когда start_date == end_date"""
+        """Test when start_date == end_date"""
         result = pick_dates_from_range(
             datetime.date(2024, 6, 15),
             datetime.date(2024, 6, 15),
@@ -155,9 +155,9 @@ class TestPicDatesFromRange(SimpleTestCase):
         self.assertEqual(result, ["2024-06-15"])
 
     def test_pick_dates_from_range_weekend_handling(self):
-        """Тест обработки выходных дней с is_only_bday=True"""
+        """Test weekend handling with is_only_bday=True"""
         # Saturday to Sunday range with daily frequency
-        # 2024-09-07 is Saturday, 2024-09-08 is Sunday
+        # 2024-09-07 is Saturday, and 2024-09-08 is Sunday
         result = pick_dates_from_range(
             datetime.date(2024, 9, 7),
             datetime.date(2024, 9, 8),
@@ -180,21 +180,21 @@ class TestPicDatesFromRange(SimpleTestCase):
         self.assertEqual(result, ["2024-09-06", "2024-09-09"])
 
     def test_pick_dates_from_range_monthly_weekend_adjustment(self):
-        """Тест корректировки месячных дат, попадающих на выходные"""
-        # If month start/end falls on weekend, should shift to business day
+        """Test monthly date adjustment for dates falling on weekends"""
+        # If month start/end falls on a weekend, should shift to business day
         # 2024-06-01 is Saturday
         result = pick_dates_from_range(
             datetime.date(2024, 6, 1),  # Saturday
             datetime.date(2024, 8, 31),
             "M",
             True,  # Adjust to business days
-            True  # Start of month
+            True  # Start of the month
         )
         # June 1 (Sat) should shift to June 3 (Mon)
         self.assertIn("2024-06-03", result)
 
     def test_pick_dates_from_range_string_input(self):
-        """Тест с входными данными в виде строк"""
+        """Test with string input data"""
         result = pick_dates_from_range(
             "2024-01-01",
             "2024-03-31",
@@ -205,7 +205,7 @@ class TestPicDatesFromRange(SimpleTestCase):
         self.assertEqual(result, ["2024-01-01", "2024-02-01", "2024-03-01"])
 
     def test_pick_dates_from_range_empty_result(self):
-        """Тест случая, когда pd.date_range возвращает пустой список"""
+        """Test case when pd.date_range returns an empty list"""
         # Very short range that doesn't contain full period
         result = pick_dates_from_range(
             datetime.date(2024, 1, 2),
@@ -214,11 +214,11 @@ class TestPicDatesFromRange(SimpleTestCase):
             False,
             False  # End of year
         )
-        # Should return empty list as range doesn't contain full year
+        # Should return the empty list as range doesn't contain the full year
         self.assertEqual(result, [])
 
     def test_pick_dates_from_range_no_duplicates(self):
-        """Тест что в результате нет дубликатов дат"""
+        """Test that the result contains no duplicate dates"""
         result = pick_dates_from_range(
             datetime.date(2024, 1, 1),
             datetime.date(2024, 12, 31),
@@ -230,7 +230,7 @@ class TestPicDatesFromRange(SimpleTestCase):
         self.assertEqual(len(result), len(set(result)))
 
     def test_pick_dates_from_range_quarterly_business_days(self):
-        """Тест квартальной частоты с корректировкой на рабочие дни"""
+        """Test quarterly frequency with business day adjustment"""
         result = pick_dates_from_range(
             datetime.date(2024, 1, 1),
             datetime.date(2024, 12, 31),
@@ -312,7 +312,7 @@ class TestCalcPeriodDate(SimpleTestCase):
                                  f"Test case {i}: {test_case} expected {expected[i]}, got {date}")
 
     def test_get_calc_period_date_edge_cases(self):
-        """Edge cases, weekends с business day adjustment"""
+        """Edge cases, weekends with business day adjustment"""
         string_result = calculate_period_date("2024-09-15", "M", 1, False, True)
         self.assertEqual(string_result, "2024-10-01")
 
