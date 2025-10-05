@@ -5,6 +5,7 @@ import logging
 from datetime import timedelta
 
 import pandas as pd
+
 # from django.conf import settings
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.contenttypes.models import ContentType
@@ -21,7 +22,7 @@ VALID_FREQUENCY = {
     "W",  # Weekly
     "M",  # Monthly
     "Q",  # Quarterly
-    "HY", # Half-Yearly (1st or 2nd half of the calendar year)
+    "HY",  # Half-Yearly (1st or 2nd half of the calendar year)
     "Y",  # Yearly
     "C",  # Custom period - no changes
 }
@@ -733,7 +734,7 @@ def pick_dates_from_range(
 ) -> list[str]:
     """
     Generates a list of dates from a range with a given frequency.
-    
+
     :param start_date: Start date in YYYY-MM-DD format.
     :param end_date: End date in YYYY-MM-DD format.
     :param frequency: "D" - (daily) / "W" - (weekly) / "M" - (monthly) / "Q" - (quarterly) /
@@ -761,7 +762,7 @@ def pick_dates_from_range(
 
     # Preserve the original start_date for incomplete period handling
     original_start_date = start_date
-    
+
     frequency = frequency if start else f"E{frequency}"
 
     # Align the start_date to the period boundary for proper date range generation
@@ -770,13 +771,13 @@ def pick_dates_from_range(
         aligned_start_date = calc_shift_date_map[frequency](start_date)
     else:
         aligned_start_date = start_date
-    
+
     dates = pd.date_range(start=aligned_start_date, end=end_date, freq=frequency_map[frequency]())
     dates = [d.date() for d in dates]
 
     # Filter out dates that are before the original start date
     dates = [d for d in dates if d >= original_start_date]
-    
+
     # pd.date_range - adds dates that fall completely within
     # the frequency range. Adding dates from incomplete periods at the start/end
     # the frequency. Adding in the list uneven areas of date

@@ -26,11 +26,11 @@ def test_func(func, test_cases, verbose=True):
     print(f"{func.__name__} test is starting ...")
 
     for test_case in test_cases:
-        test_num = test_case['test_num']
+        test_num = test_case["test_num"]
         expected_res = test_case["expected_res"]
 
         # Prepare arguments for the function by excluding 'test_num' and 'expected_res'
-        needed_test_fields = {key: val for key, val in test_case.items() if key not in ['test_num', 'expected_res']}
+        needed_test_fields = {key: val for key, val in test_case.items() if key not in ["test_num", "expected_res"]}
 
         # Call the function with unpacked arguments
         res = func(**needed_test_fields)
@@ -68,7 +68,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 9, 7).strftime("%Y-%m-%d"),
         },
         {
@@ -78,7 +77,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 9, 7).strftime("%Y-%m-%d"),
         },
         {
@@ -88,7 +86,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 6).strftime("%Y-%m-%d"),
         },
         {
@@ -98,7 +95,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 9).strftime("%Y-%m-%d"),
         },
         {
@@ -108,7 +104,6 @@ def calc_period_date_test():
             "shift": 1,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 9).strftime("%Y-%m-%d"),
         },
         {
@@ -118,7 +113,6 @@ def calc_period_date_test():
             "shift": -1,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 6).strftime("%Y-%m-%d"),
         },
         {
@@ -128,7 +122,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 9, 2).strftime("%Y-%m-%d"),
         },
         {
@@ -138,7 +131,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 9, 8).strftime("%Y-%m-%d"),
         },
         {
@@ -148,7 +140,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 2).strftime("%Y-%m-%d"),
         },
         {
@@ -158,7 +149,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 6).strftime("%Y-%m-%d"),
         },
         {
@@ -168,7 +158,6 @@ def calc_period_date_test():
             "shift": -7,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 7, 15).strftime("%Y-%m-%d"),
         },
         {
@@ -178,7 +167,6 @@ def calc_period_date_test():
             "shift": -7,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 7, 21).strftime("%Y-%m-%d"),
         },
         {
@@ -188,7 +176,6 @@ def calc_period_date_test():
             "shift": -7,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 7, 15).strftime("%Y-%m-%d"),
         },
         {
@@ -198,7 +185,6 @@ def calc_period_date_test():
             "shift": -7,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 7, 19).strftime("%Y-%m-%d"),
         },
         {
@@ -208,7 +194,6 @@ def calc_period_date_test():
             "shift": 52,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2025, 9, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -218,7 +203,6 @@ def calc_period_date_test():
             "shift": 52,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2025, 9, 7).strftime("%Y-%m-%d"),
         },
         {
@@ -228,7 +212,6 @@ def calc_period_date_test():
             "shift": 52,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2025, 9, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -238,7 +221,6 @@ def calc_period_date_test():
             "shift": 52,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2025, 9, 5).strftime("%Y-%m-%d"),
         },
         {
@@ -248,7 +230,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 9, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -258,7 +239,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 9, 30).strftime("%Y-%m-%d"),
         },
         {
@@ -268,7 +248,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 2).strftime("%Y-%m-%d"),
         },
         {
@@ -278,7 +257,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 30).strftime("%Y-%m-%d"),
         },
         {
@@ -288,7 +266,6 @@ def calc_period_date_test():
             "shift": 25,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2026, 10, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -298,7 +275,6 @@ def calc_period_date_test():
             "shift": 25,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2026, 10, 31).strftime("%Y-%m-%d"),
         },
         {
@@ -308,7 +284,6 @@ def calc_period_date_test():
             "shift": 25,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2026, 10, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -318,7 +293,6 @@ def calc_period_date_test():
             "shift": 25,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2026, 10, 30).strftime("%Y-%m-%d"),
         },
         {
@@ -328,7 +302,6 @@ def calc_period_date_test():
             "shift": -19,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2023, 2, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -338,7 +311,6 @@ def calc_period_date_test():
             "shift": -19,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2023, 2, 28).strftime("%Y-%m-%d"),
         },
         {
@@ -348,7 +320,6 @@ def calc_period_date_test():
             "shift": -19,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2023, 2, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -358,7 +329,6 @@ def calc_period_date_test():
             "shift": -19,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2023, 2, 28).strftime("%Y-%m-%d"),
         },
         {
@@ -368,7 +338,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 7, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -378,7 +347,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 9, 30).strftime("%Y-%m-%d"),
         },
         {
@@ -388,7 +356,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 7, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -398,7 +365,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2024, 9, 30).strftime("%Y-%m-%d"),
         },
         {
@@ -408,7 +374,6 @@ def calc_period_date_test():
             "shift": 10,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2027, 1, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -418,7 +383,6 @@ def calc_period_date_test():
             "shift": 10,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2027, 3, 31).strftime("%Y-%m-%d"),
         },
         {
@@ -428,7 +392,6 @@ def calc_period_date_test():
             "shift": 10,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2027, 1, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -438,7 +401,6 @@ def calc_period_date_test():
             "shift": 10,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2027, 3, 31).strftime("%Y-%m-%d"),
         },
         {
@@ -448,7 +410,6 @@ def calc_period_date_test():
             "shift": -10,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2022, 1, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -458,7 +419,6 @@ def calc_period_date_test():
             "shift": -10,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2022, 3, 31).strftime("%Y-%m-%d"),
         },
         {
@@ -468,7 +428,6 @@ def calc_period_date_test():
             "shift": -10,
             "start": True,
             "is_only_bday": True,
-
             "expected_res": datetime(2022, 1, 3).strftime("%Y-%m-%d"),
         },
         {
@@ -478,7 +437,6 @@ def calc_period_date_test():
             "shift": -10,
             "start": False,
             "is_only_bday": True,
-
             "expected_res": datetime(2022, 3, 31).strftime("%Y-%m-%d"),
         },
         # Half-yearly (HY) tests derived from Sergey's hytd cases
@@ -489,7 +447,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 7, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -499,7 +456,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 12, 31).strftime("%Y-%m-%d"),
         },
         {
@@ -509,7 +465,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 1, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -519,7 +474,6 @@ def calc_period_date_test():
             "shift": 0,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2024, 6, 30).strftime("%Y-%m-%d"),
         },
         {
@@ -529,7 +483,6 @@ def calc_period_date_test():
             "shift": -3,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2023, 1, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -539,7 +492,6 @@ def calc_period_date_test():
             "shift": -3,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2023, 6, 30).strftime("%Y-%m-%d"),
         },
         {
@@ -549,7 +501,6 @@ def calc_period_date_test():
             "shift": 4,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2026, 7, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -559,7 +510,6 @@ def calc_period_date_test():
             "shift": 4,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2026, 12, 31).strftime("%Y-%m-%d"),
         },
         {
@@ -569,7 +519,6 @@ def calc_period_date_test():
             "shift": -8,
             "start": True,
             "is_only_bday": False,
-
             "expected_res": datetime(2020, 7, 1).strftime("%Y-%m-%d"),
         },
         {
@@ -579,12 +528,10 @@ def calc_period_date_test():
             "shift": -8,
             "start": False,
             "is_only_bday": False,
-
             "expected_res": datetime(2020, 12, 31).strftime("%Y-%m-%d"),
         },
     ]
     test_func(calculate_period_date, test_cases)
-
 
 
 class TestCalcPeriodTest(SimpleTestCase):

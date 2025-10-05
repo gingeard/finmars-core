@@ -499,9 +499,7 @@ if __name__ == "__main__":
                 f"\ntest_case num {num}\ntest_case date_from_str: {date_from_str}\ntest_case date_to_str: {date_to_str}\ntest_case period_type: {period_type}\ntest_case if_date_adjust_to_user_range: {if_date_adjust_to_user_range}\ntest_case if_use_business_day: {if_use_business_day}\nres: {res}\ntest_case res: {test_case['res']}"
             )
 
-
     print("starting split_date_range_list_tests_generate_if_no_date_to")
-
 
     def split_date_range_list_tests_generate_if_no_date_to():
         cases_if_date_to_earlier = []
@@ -533,11 +531,9 @@ if __name__ == "__main__":
                     num += 1
         return cases_if_date_to_earlier
 
-
     split_date_range_list_test_check(split_date_range_list_tests_generate_if_no_date_to())
 
     print("starting split_date_range_list_tests_generate_if_no_date_from")
-
 
     def split_date_range_list_tests_generate_if_no_date_from():
         cases_if_date_to_earlier = []
@@ -569,11 +565,9 @@ if __name__ == "__main__":
                     num += 1
         return cases_if_date_to_earlier
 
-
     split_date_range_list_test_check(split_date_range_list_tests_generate_if_no_date_from())
 
     print("starting split_date_range_list_tests_generate_if_no_period_type")
-
 
     def split_date_range_list_tests_generate_if_no_period_type():
         cases_if_date_to_earlier = []
@@ -605,11 +599,9 @@ if __name__ == "__main__":
                     num += 1
         return cases_if_date_to_earlier
 
-
     split_date_range_list_test_check(split_date_range_list_tests_generate_if_no_period_type())
 
     print("starting split_date_range_list_tests_generate_if_date_to_earlier")
-
 
     def split_date_range_list_tests_generate_if_date_to_earlier():
         cases_if_date_to_earlier = []
@@ -641,11 +633,9 @@ if __name__ == "__main__":
                     num += 1
         return cases_if_date_to_earlier
 
-
     split_date_range_list_test_check(split_date_range_list_tests_generate_if_date_to_earlier())
 
     print("starting split_date_range_list_tests_generate_if_fully_in_weekend_business_day")
-
 
     def split_date_range_list_tests_generate_if_fully_in_weekend_business_day():
         cases_if_date_to_earlier = []
@@ -677,7 +667,6 @@ if __name__ == "__main__":
                     cases_if_date_to_earlier.append(case)
                     num += 1
         return cases_if_date_to_earlier
-
 
     split_date_range_list_test_check(split_date_range_list_tests_generate_if_fully_in_weekend_business_day())
 
