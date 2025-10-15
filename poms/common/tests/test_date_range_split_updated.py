@@ -210,8 +210,8 @@ def split_date_range_list(
     Splits a given date range into multiple non-overlapping periods based on the specified period type.
     Each period will be fully contained within the date_from and date_to range
     if if_date_adjust_to_user_range = True.
-    If if_date_adjust_to_user_range = False, overall date range may be broaden to
-    the actual start and end dates of selected period_type.
+    If if_date_adjust_to_user_range = False, the overall date range may be broadened to
+    the actual start and end dates of the selected period_type.
 
     Parameters:
     date_from_str (str): Start date in 'YYYY-MM-DD' format.
@@ -595,7 +595,7 @@ if __name__ == "__main__":
         if_date_adjust_to_user_range_vals = [False, True]
         if_use_business_day_vals = [False, True]
         num = 0
-        for period_type in period_types:
+        for _ in period_types:
             for if_date_adjust_to_user_range in if_date_adjust_to_user_range_vals:
                 for if_use_business_day in if_use_business_day_vals:
                     case = {
