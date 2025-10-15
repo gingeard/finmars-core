@@ -12,7 +12,8 @@ def validate_iso_date_format(date_str: str):
     date_str (str): The date string to validate.
 
     Returns:
-    tuple: A tuple containing the status ('success' or 'error'), an error message if applicable, and the parsed date as a datetime object if successful.
+    tuple: A tuple containing the status ('success' or 'error'), an error message if applicable,
+           and the parsed date as a datetime object if successful.
     """
     try:
         date = datetime.strptime(date_str, "%Y-%m-%d")
@@ -207,18 +208,23 @@ def split_date_range_list(
 ) -> tuple:
     """
     Splits a given date range into multiple non-overlapping periods based on the specified period type.
-    Each period will be fully contained within the date_from and date_to range if if_date_adjust_to_user_range = True.
-    If if_date_adjust_to_user_range = False, overall date range may be broaden to the actual start and end dates of selected period_type.
+    Each period will be fully contained within the date_from and date_to range
+    if if_date_adjust_to_user_range = True.
+    If if_date_adjust_to_user_range = False, overall date range may be broaden to
+    the actual start and end dates of selected period_type.
 
     Parameters:
     date_from_str (str): Start date in 'YYYY-MM-DD' format.
     date_to_str (str): End date in 'YYYY-MM-DD' format.
-    period_type (str): The type of period for splitting the date range. Options are 'daily', 'weekly', 'monthly', 'quarterly', 'half-year', 'yearly', 'custom'.
-    if_date_adjust_to_user_range (bool): Whether to adjust the period start/end dates to ensure they are within the user-specified date range.
+    period_type (str): The type of period for splitting the date range. Options are:
+                       'daily', 'weekly', 'monthly', 'quarterly', 'half-year', 'yearly', 'custom'.
+    if_date_adjust_to_user_range (bool): Whether to adjust the period start/end dates to ensure
+                                         they are within the user-specified date range.
     if_use_business_day (bool): Whether to adjust the start/end dates to the nearest business day.
 
     Returns:
-    tuple: A tuple containing the status ('success' or 'error'), an error message if applicable, and a list of date ranges.
+    tuple: A tuple containing the status ('success' or 'error'), an error message if applicable,
+           and a list of date ranges.
     """
     if not date_from_str or not date_to_str:
         return "error", "Both date_from_str and date_to_str must be provided.", None
@@ -236,7 +242,8 @@ def split_date_range_list(
         if date_from_adj > date_to_adj:
             return (
                 "error",
-                f"if_use_business_day=True but date range is fully in weekend: date_from ({date_from_str}), date_to ({date_to_str})",
+                f"if_use_business_day=True but date range is fully in weekend: "
+                f"date_from ({date_from_str}), date_to ({date_to_str})",
                 None,
             )
 
@@ -255,7 +262,8 @@ def split_date_range_list(
         else:
             return (
                 "error",
-                f"date_to ({date_to}) == date_from ({date_from}) for non-daily or non-custom period_type ({period_type})",
+                f"date_to ({date_to}) == date_from ({date_from}) for non-daily or "
+                f"non-custom period_type ({period_type})",
                 None,
             )
 
@@ -496,7 +504,11 @@ if __name__ == "__main__":
             # if isinstance(res, list):
             #     res = res[::-1]
             assert res == test_case["res"], (
-                f"\ntest_case num {num}\ntest_case date_from_str: {date_from_str}\ntest_case date_to_str: {date_to_str}\ntest_case period_type: {period_type}\ntest_case if_date_adjust_to_user_range: {if_date_adjust_to_user_range}\ntest_case if_use_business_day: {if_use_business_day}\nres: {res}\ntest_case res: {test_case['res']}"
+                f"\ntest_case num {num}\ntest_case date_from_str: {date_from_str}\n"
+                f"test_case date_to_str: {date_to_str}\ntest_case period_type: {period_type}\n"
+                f"test_case if_date_adjust_to_user_range: {if_date_adjust_to_user_range}\n"
+                f"test_case if_use_business_day: {if_use_business_day}\nres: {res}\n"
+                f"test_case res: {test_case['res']}"
             )
 
     print("starting split_date_range_list_tests_generate_if_no_date_to")
