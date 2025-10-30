@@ -4,6 +4,11 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 from rest_framework.fields import ReadOnlyField
 from rest_framework.relations import RelatedField
+from rest_framework import serializers
+import json
+
+import logging
+_l = logging.getLogger("poms.transactions")
 
 from poms.common.fields import (
     SlugRelatedFilteredField,
@@ -112,3 +117,22 @@ class ReadOnlyContentTypeField(ReadOnlyField):
 
     def to_representation(self, obj):
         return f"{obj.app_label}.{obj.model}"
+
+
+class CharOrJSONField(serializers.CharField):
+    def to_representation(self, value):
+        # Try to parse string to JSON
+        if isinstance(value, str):
+            try:
+                val = json.loads(value)
+                # _l.info("CharOrJSONField to_representation %s" % val)
+                return val
+            except json.JSONDecodeError:
+                pass
+        return value
+
+    def to_internal_value(self, data):
+        # Accept dicts and convert to JSON string
+        if isinstance(data, (dict, list)):
+            return json.dumps(data)
+        return super().to_internal_value(data)

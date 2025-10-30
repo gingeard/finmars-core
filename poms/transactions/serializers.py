@@ -11,6 +11,7 @@ from rest_framework.fields import empty
 
 from poms.accounts.fields import AccountDefault, AccountField
 from poms.accounts.models import Account
+from poms.clients.models import Client
 from poms.common.fields import ExpressionField, name_validator
 from poms.common.models import EXPRESSION_FIELD_LENGTH
 from poms.common.serializers import (
@@ -73,7 +74,7 @@ from poms.transactions.fields import (
     ReadOnlyContentTypeField,
     TransactionTypeGroupField,
     TransactionTypeInputContentTypeField,
-    TransactionTypeInputField,
+    TransactionTypeInputField, CharOrJSONField,
 )
 from poms.transactions.handlers import TransactionTypeProcess
 from poms.transactions.models import (
@@ -101,6 +102,7 @@ from poms.transactions.models import (
 )
 from poms.users.fields import HiddenMemberField, MasterUserField
 from poms.users.utils import get_member_from_context
+from poms.vault.models import VaultRecord
 
 _l = logging.getLogger("poms.transactions")
 
@@ -3112,7 +3114,7 @@ class TransactionTypeSerializer(
                 actions[order] = item
 
     def save_actions_instrument_accrual_calculation_schedule(
-        self, instance, inputs, actions, existed_actions, actions_data
+            self, instance, inputs, actions, existed_actions, actions_data
     ):
         for order, action_data in enumerate(actions_data):
             pk = action_data.pop("id", None)
@@ -4237,6 +4239,11 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
             Strategy3ViewSerializer,
         )
 
+        from poms.clients.fields import ClientField
+        from poms.clients.serializers import ClientSerializer
+        from poms.vault.fields import VaultRecordField
+        from poms.vault.serializers import VaultRecordSerializer
+
         super().__init__(**kwargs)
 
         _st = time.perf_counter()
@@ -4248,8 +4255,8 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
             field_object = None
 
             if i.value_type in (
-                TransactionTypeInput.STRING,
-                TransactionTypeInput.SELECTOR,
+                    TransactionTypeInput.STRING,
+                    TransactionTypeInput.SELECTOR
             ):
                 field = serializers.CharField(
                     required=False,
@@ -4258,7 +4265,9 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
                     label=i.name,
                     help_text=i.verbose_name,
                 )
-
+            elif i.value_type == TransactionTypeInput.JSON:
+                _l.info("i JSON %s" % i)
+                field = CharOrJSONField(required=False, allow_null=True)
             elif i.value_type == TransactionTypeInput.NUMBER:
                 field = serializers.FloatField(
                     required=False,
@@ -4456,6 +4465,28 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
                         help_text=i.verbose_name,
                     )
                     field_object = EventScheduleSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, Client):
+
+                    field = ClientField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = ClientSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, VaultRecord):
+
+                    field = VaultRecordField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = VaultRecordSerializer(source=name, read_only=True)
 
             elif i.value_type == TransactionTypeInput.BUTTON:
                 field = serializers.JSONField(allow_null=True, required=False)
@@ -4708,8 +4739,9 @@ class ComplexTransactionViewOnly:
             i = ci.transaction_type_input
             value = None
             if i.value_type in (
-                TransactionTypeInput.STRING,
-                TransactionTypeInput.SELECTOR,
+                    TransactionTypeInput.STRING,
+                    TransactionTypeInput.SELECTOR,
+                    TransactionTypeInput.JSON,
             ):
                 value = ci.value_string
             elif i.value_type == TransactionTypeInput.NUMBER:
@@ -4728,7 +4760,8 @@ class ComplexTransactionViewOnly:
         result_time = f"{time.perf_counter() - _st:3.3f}"
         _l.debug(f"ComplexTransactionViewOnly.init {result_time}")
 
-    def _get_val_by_model_cls_for_complex_transaction_input(self, master_user, obj, model_class):  # noqa: PLR0911, PLR0912
+    def _get_val_by_model_cls_for_complex_transaction_input(self, master_user, obj,
+                                                            model_class):  # noqa: PLR0911, PLR0912
         try:
             if issubclass(model_class, Account):
                 return Account.objects.get(master_user=master_user, user_code=obj.value_relation)
@@ -4762,6 +4795,10 @@ class ComplexTransactionViewOnly:
                 return EventClass.objects.get(user_code=obj.value_relation)
             elif issubclass(model_class, NotificationClass):
                 return NotificationClass.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, Client):
+                return Client.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, VaultRecord):
+                return VaultRecord.objects.get(user_code=obj.value_relation)
 
         except Exception:
             _l.info(f"Could not find default value relation {obj.value_relation} ")
@@ -5045,17 +5082,17 @@ class RecalculatePermissionComplexTransactionSerializer(serializers.Serializer):
 
 class RecalculateUserFields:
     def __init__(
-        self,
-        task_id=None,
-        task_status=None,
-        master_user=None,
-        member=None,
-        transaction_type_id=None,
-        key=None,
-        total_rows=None,
-        processed_rows=None,
-        stats_file_report=None,
-        stats=None,
+            self,
+            task_id=None,
+            task_status=None,
+            master_user=None,
+            member=None,
+            transaction_type_id=None,
+            key=None,
+            total_rows=None,
+            processed_rows=None,
+            stats_file_report=None,
+            stats=None,
     ):
         self.task_id = task_id
         self.task_status = task_status
