@@ -1,3 +1,5 @@
+from rest_framework import serializers
+
 from poms.common.serializers import (
     ModelWithUserCodeSerializer,
 )
@@ -64,3 +66,26 @@ class SourceVersionSerializer(ModelWithUserCodeSerializer):
             "version_semantic",
             "version_calendar"
         ]
+
+
+class ModelWithProvenanceSerializer(serializers.ModelSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["provider"] = serializers.PrimaryKeyRelatedField(queryset=Provider.objects.all(),
+                                                                     allow_null=True, required=False)
+        self.fields["provider_object"] = ProviderSerializer(read_only=True)
+        self.fields["provider_version"] = serializers.PrimaryKeyRelatedField(queryset=ProviderVersion.objects.all(),
+                                                                              allow_null=True,
+                                                                             required=False)
+        self.fields["provider_version_object"] = ProviderVersionSerializer(read_only=True)
+
+        self.fields["source"] = serializers.PrimaryKeyRelatedField(queryset=Source.objects.all(),
+                                                                   allow_null=True, required=False)
+        self.fields["source_object"] = SourceSerializer(read_only=True)
+        self.fields["source_version"] = serializers.PrimaryKeyRelatedField(queryset=SourceVersion.objects.all(),
+                                                                            allow_null=True,
+                                                                           required=False)
+        self.fields["source_version_object"] = SourceVersionSerializer(read_only=True)
+
+    def validate(self, data):
+        return data

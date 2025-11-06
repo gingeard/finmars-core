@@ -6,7 +6,6 @@ from poms.users.models import MasterUser
 
 
 class Provider(NamedModel, TimeStampedModel):
-
     master_user = models.ForeignKey(
         MasterUser,
         related_name="providers",
@@ -20,7 +19,6 @@ class Provider(NamedModel, TimeStampedModel):
 
 
 class ProviderVersion(NamedModel, TimeStampedModel):
-
     master_user = models.ForeignKey(
         MasterUser,
         related_name="provider_versions",
@@ -56,7 +54,6 @@ class ProviderVersion(NamedModel, TimeStampedModel):
 
 
 class Source(NamedModel, TimeStampedModel):
-
     master_user = models.ForeignKey(
         MasterUser,
         related_name="sources",
@@ -70,7 +67,6 @@ class Source(NamedModel, TimeStampedModel):
 
 
 class SourceVersion(NamedModel, TimeStampedModel):
-
     master_user = models.ForeignKey(
         MasterUser,
         related_name="source_versions",
@@ -103,3 +99,40 @@ class SourceVersion(NamedModel, TimeStampedModel):
     class Meta(NamedModel.Meta):
         verbose_name = gettext_lazy("source")
         verbose_name_plural = gettext_lazy("sources")
+
+
+class ProvenanceModel(models.Model):
+    provider = models.ForeignKey(
+        "provenance.Provider",
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("provider"),
+        on_delete=models.CASCADE,
+    )
+
+    provider_version = models.ForeignKey(
+        "provenance.ProviderVersion",
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("provider_version"),
+        on_delete=models.CASCADE,
+    )
+
+    source = models.ForeignKey(
+        "provenance.Source",
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("source"),
+        on_delete=models.CASCADE,
+    )
+
+    source_version = models.ForeignKey(
+        "provenance.SourceVersion",
+        null=True,
+        blank=True,
+        verbose_name=gettext_lazy("source_version"),
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        abstract = True
