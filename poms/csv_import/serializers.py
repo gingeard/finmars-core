@@ -211,22 +211,21 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "pricing_condition",
                 "country",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
                 "credential_version_integer",
-                "platform_version",
                 "origin_initiator_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "accounts.account": [
                 "name",
@@ -236,12 +235,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "notes",
                 "type",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -252,6 +245,13 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
+
             ],
             "counterparties.counterparty": [
                 "name",
@@ -261,12 +261,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "notes",
                 "group",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -277,6 +271,13 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
+
             ],
             "counterparties.responsible": [
                 "name",
@@ -286,12 +287,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "notes",
                 "group",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -302,6 +297,13 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
+
             ],
             "portfolios.portfolio": [
                 "name",
@@ -314,12 +316,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "register_pricing_policy",
                 "register_instrument_type",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -330,6 +326,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "portfolios.portfoliotype": [
                 "name",
@@ -365,12 +367,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "user_text_2",
                 "user_text_3",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -381,18 +377,20 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
+
             ],
             "instruments.instrumentfactorschedule": [
                 "instrument",
                 "effective_date",
                 "factor_value",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -403,6 +401,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "instruments.accrualcalculationschedule": [
                 "instrument",
@@ -415,12 +419,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "notes",
                 "eom",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -431,6 +429,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "instruments.pricehistory": [
                 "instrument",
@@ -445,12 +449,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "short_delta",
                 "is_temporary_price",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -461,6 +459,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "currencies.currencyhistory": [
                 "currency",
@@ -469,12 +473,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "fx_rate",
                 "is_temporary_fx_rate",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -485,6 +483,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "strategies.strategy1": [
                 "name",
@@ -494,12 +498,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "notes",
                 "subgroup",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -510,6 +508,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "strategies.strategy2": [
                 "name",
@@ -519,12 +523,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "notes",
                 "subgroup",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -535,6 +533,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
             "strategies.strategy3": [
                 "name",
@@ -544,12 +548,6 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "notes",
                 "subgroup",
                 # New fields 2025-09
-                "provider_user_code",
-                "provider_version_semantic",
-                "provider_version_calendar",
-                "source_user_code",
-                "source_version_semantic",
-                "source_version_calendar",
                 "reference_ids",
                 "attributes_extra",
                 "credential_user_code",
@@ -560,6 +558,12 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "workflow_module_version_semantic",
                 "workflow_id",
                 "platform_task_id",
+
+                "provider",
+                "provider_version",
+                "source",
+                "source_version",
+                "platform_version"
             ],
         }
 

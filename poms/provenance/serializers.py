@@ -3,7 +3,7 @@ from rest_framework import serializers
 from poms.common.serializers import (
     ModelWithUserCodeSerializer,
 )
-from poms.provenance.models import Source, Provider, ProviderVersion, SourceVersion
+from poms.provenance.models import Source, Provider, ProviderVersion, SourceVersion, PlatformVersion
 
 
 class ProviderSerializer(ModelWithUserCodeSerializer):
@@ -68,6 +68,21 @@ class SourceVersionSerializer(ModelWithUserCodeSerializer):
         ]
 
 
+class PlatformVersionSerializer(ModelWithUserCodeSerializer):
+    class Meta:
+        model = PlatformVersion
+        fields = [
+            "id",
+            "master_user",
+            "user_code",
+            "name",
+            "short_name",
+            "public_name",
+
+            "version_details",
+        ]
+
+
 class ModelWithProvenanceSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,7 +90,7 @@ class ModelWithProvenanceSerializer(serializers.ModelSerializer):
                                                                      allow_null=True, required=False)
         self.fields["provider_object"] = ProviderSerializer(read_only=True)
         self.fields["provider_version"] = serializers.PrimaryKeyRelatedField(queryset=ProviderVersion.objects.all(),
-                                                                              allow_null=True,
+                                                                             allow_null=True,
                                                                              required=False)
         self.fields["provider_version_object"] = ProviderVersionSerializer(read_only=True)
 
@@ -83,9 +98,14 @@ class ModelWithProvenanceSerializer(serializers.ModelSerializer):
                                                                    allow_null=True, required=False)
         self.fields["source_object"] = SourceSerializer(read_only=True)
         self.fields["source_version"] = serializers.PrimaryKeyRelatedField(queryset=SourceVersion.objects.all(),
-                                                                            allow_null=True,
+                                                                           allow_null=True,
                                                                            required=False)
         self.fields["source_version_object"] = SourceVersionSerializer(read_only=True)
+
+        self.fields["platform_version"] = serializers.PrimaryKeyRelatedField(queryset=PlatformVersion.objects.all(),
+                                                                             allow_null=True,
+                                                                             required=False)
+        self.fields["platform_version_object"] = PlatformVersionSerializer(read_only=True)
 
     def validate(self, data):
         return data

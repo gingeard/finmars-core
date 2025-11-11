@@ -1,8 +1,9 @@
 from poms.common.views import AbstractModelViewSet
-from poms.provenance.filters import SourceFilterSet, ProviderFilterSet, ProviderVersionFilterSet, SourceVersionFilterSet
-from poms.provenance.models import Provider, Source, ProviderVersion, SourceVersion
+from poms.provenance.filters import SourceFilterSet, ProviderFilterSet, ProviderVersionFilterSet, \
+    SourceVersionFilterSet, PlatformVersionFilterSet
+from poms.provenance.models import Provider, Source, ProviderVersion, SourceVersion, PlatformVersion
 from poms.provenance.serializers import ProviderSerializer, SourceSerializer, ProviderVersionSerializer, \
-    SourceVersionSerializer
+    SourceVersionSerializer, PlatformVersionSerializer
 
 
 class ProviderViewSet(AbstractModelViewSet):
@@ -53,6 +54,21 @@ class SourceVersionViewSet(AbstractModelViewSet):
     ]
     filterset_class = SourceVersionFilterSet
     serializer_class = SourceVersionSerializer
+    ordering_fields = [
+        "user_code",
+        "name",
+        "short_name",
+        "public_name",
+    ]
+
+
+
+class PlatformVersionViewSet(AbstractModelViewSet):
+    queryset = PlatformVersion.objects
+    filter_backends = AbstractModelViewSet.filter_backends + [
+    ]
+    filterset_class = PlatformVersionFilterSet
+    serializer_class = PlatformVersionSerializer
     ordering_fields = [
         "user_code",
         "name",
