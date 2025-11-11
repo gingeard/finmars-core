@@ -37,6 +37,7 @@ import poms.transactions.urls as transaction_router
 import poms.ui.urls as ui_router
 import poms.users.urls as users_router
 import poms.vault.urls as vault_router
+import poms.provenance.urls as provenance_router
 import poms.widgets.views as widgets
 from finmars_standardized_errors.views import ErrorRecordViewSet
 from poms.auth_tokens.views import (
@@ -332,6 +333,7 @@ urlpatterns = [
     re_path("^v1/ui/", include(ui_router.router.urls)),
     re_path("^v1/explorer/", include(explorer_router.router.urls)),
     re_path("^v1/clients/", include(clients_router.router.urls)),
+    re_path("^v1/provenance/", include(provenance_router.router.urls)),
     re_path("^v1/vault/", include(vault_router.router.urls)),
     re_path("^v1/iam/", include(iam_router.router.urls)),
     re_path("^v1/schedules/", include(schedule_router.router.urls)),
