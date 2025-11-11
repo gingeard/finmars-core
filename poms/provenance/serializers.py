@@ -1,12 +1,18 @@
 from rest_framework import serializers
 
 from poms.common.serializers import (
-    ModelWithUserCodeSerializer,
+    ModelWithUserCodeSerializer, ModelWithTimeStampSerializer, ModelMetaSerializer,
 )
 from poms.provenance.models import Source, Provider, ProviderVersion, SourceVersion, PlatformVersion
+from poms.users.fields import MasterUserField
 
 
-class ProviderSerializer(ModelWithUserCodeSerializer):
+class ProviderSerializer(ModelWithUserCodeSerializer,
+                         ModelWithTimeStampSerializer,
+                         ModelMetaSerializer):
+
+    master_user = MasterUserField()
+
     class Meta:
         model = Provider
         fields = [
@@ -16,11 +22,17 @@ class ProviderSerializer(ModelWithUserCodeSerializer):
             "name",
             "short_name",
             "public_name",
+            "notes"
 
         ]
 
 
-class ProviderVersionSerializer(ModelWithUserCodeSerializer):
+class ProviderVersionSerializer(ModelWithUserCodeSerializer,
+                                ModelWithTimeStampSerializer,
+                                ModelMetaSerializer):
+
+    master_user = MasterUserField()
+
     class Meta:
         model = ProviderVersion
         fields = [
@@ -30,6 +42,7 @@ class ProviderVersionSerializer(ModelWithUserCodeSerializer):
             "name",
             "short_name",
             "public_name",
+            "notes",
             "provider",
 
             "version_semantic",
@@ -38,7 +51,12 @@ class ProviderVersionSerializer(ModelWithUserCodeSerializer):
         ]
 
 
-class SourceSerializer(ModelWithUserCodeSerializer):
+class SourceSerializer(ModelWithUserCodeSerializer,
+                       ModelWithTimeStampSerializer,
+                       ModelMetaSerializer):
+
+    master_user = MasterUserField()
+
     class Meta:
         model = Source
         fields = [
@@ -47,11 +65,17 @@ class SourceSerializer(ModelWithUserCodeSerializer):
             "user_code",
             "name",
             "short_name",
-            "public_name"
+            "public_name",
+            "notes"
         ]
 
 
-class SourceVersionSerializer(ModelWithUserCodeSerializer):
+class SourceVersionSerializer(ModelWithUserCodeSerializer,
+                              ModelWithTimeStampSerializer,
+                              ModelMetaSerializer):
+
+    master_user = MasterUserField()
+
     class Meta:
         model = SourceVersion
         fields = [
@@ -61,6 +85,7 @@ class SourceVersionSerializer(ModelWithUserCodeSerializer):
             "name",
             "short_name",
             "public_name",
+            "notes",
             "source",
 
             "version_semantic",
@@ -68,7 +93,12 @@ class SourceVersionSerializer(ModelWithUserCodeSerializer):
         ]
 
 
-class PlatformVersionSerializer(ModelWithUserCodeSerializer):
+class PlatformVersionSerializer(ModelWithUserCodeSerializer,
+                                ModelWithTimeStampSerializer,
+                                ModelMetaSerializer):
+
+    master_user = MasterUserField()
+
     class Meta:
         model = PlatformVersion
         fields = [
@@ -78,6 +108,7 @@ class PlatformVersionSerializer(ModelWithUserCodeSerializer):
             "name",
             "short_name",
             "public_name",
+            "notes",
 
             "version_details",
         ]

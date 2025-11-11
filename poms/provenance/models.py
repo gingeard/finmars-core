@@ -101,7 +101,7 @@ class SourceVersion(NamedModel, TimeStampedModel):
         verbose_name_plural = gettext_lazy("sources")
 
 
-class PlatformVersion(NamedModel):
+class PlatformVersion(NamedModel, TimeStampedModel):
 
     master_user = models.ForeignKey(
         MasterUser,
