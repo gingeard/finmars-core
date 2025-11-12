@@ -119,24 +119,24 @@ class ModelWithProvenanceSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.fields["provider"] = serializers.PrimaryKeyRelatedField(queryset=Provider.objects.all(),
                                                                      allow_null=True, required=False)
-        self.fields["provider_object"] = ProviderSerializer(read_only=True)
+        self.fields["provider_object"] = ProviderSerializer(source="provider", read_only=True)
         self.fields["provider_version"] = serializers.PrimaryKeyRelatedField(queryset=ProviderVersion.objects.all(),
                                                                              allow_null=True,
                                                                              required=False)
-        self.fields["provider_version_object"] = ProviderVersionSerializer(read_only=True)
+        self.fields["provider_version_object"] = ProviderVersionSerializer(source="provider_version", read_only=True)
 
         self.fields["source"] = serializers.PrimaryKeyRelatedField(queryset=Source.objects.all(),
                                                                    allow_null=True, required=False)
-        self.fields["source_object"] = SourceSerializer(read_only=True)
+        self.fields["source_object"] = SourceSerializer(source="source", read_only=True)
         self.fields["source_version"] = serializers.PrimaryKeyRelatedField(queryset=SourceVersion.objects.all(),
                                                                            allow_null=True,
                                                                            required=False)
-        self.fields["source_version_object"] = SourceVersionSerializer(read_only=True)
+        self.fields["source_version_object"] = SourceVersionSerializer(source="source_version", read_only=True)
 
         self.fields["platform_version"] = serializers.PrimaryKeyRelatedField(queryset=PlatformVersion.objects.all(),
                                                                              allow_null=True,
                                                                              required=False)
-        self.fields["platform_version_object"] = PlatformVersionSerializer(read_only=True)
+        self.fields["platform_version_object"] = PlatformVersionSerializer(source="platform_version", read_only=True)
 
     def validate(self, data):
         return data
