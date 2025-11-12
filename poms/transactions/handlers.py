@@ -6,7 +6,6 @@ import traceback
 from datetime import date, datetime
 
 from django.apps import apps
-
 # from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError, IntegrityError
@@ -34,6 +33,7 @@ from poms.instruments.models import (
     PricingPolicy,
 )
 from poms.portfolios.models import Portfolio
+from poms.provenance.models import Provider, ProviderVersion, Source, SourceVersion, PlatformVersion
 from poms.reconciliation.models import TransactionTypeReconField
 from poms.strategies.models import Strategy1, Strategy2, Strategy3
 from poms.system_messages.handlers import send_system_message
@@ -75,42 +75,42 @@ class TransactionTypeProcess:
             _time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             self.complex_transaction.execution_log = (
-                self.complex_transaction.execution_log + "[" + str(_time) + "] " + message + "\n"
+                    self.complex_transaction.execution_log + "[" + str(_time) + "] " + message + "\n"
             )
 
             if obj:
                 self.complex_transaction.execution_log = (
-                    self.complex_transaction.execution_log + json.dumps(obj, indent=4, default=str) + "\n"
+                        self.complex_transaction.execution_log + json.dumps(obj, indent=4, default=str) + "\n"
                 )
 
     def __init__(  # noqa: PLR0913, PLR0915
-        self,
-        process_mode=None,
-        transaction_type=None,
-        default_values=None,
-        values=None,
-        recalculate_inputs=None,
-        value_errors=None,
-        general_errors=None,
-        instruments=None,
-        instruments_errors=None,
-        complex_transaction=None,
-        complex_transaction_status=None,
-        complex_transaction_errors=None,
-        transactions=None,
-        transactions_errors=None,
-        fake_id_gen=None,
-        transaction_order_gen=None,
-        now=None,
-        context=None,  # for formula engine
-        context_values=None,  # context_values = CONTEXT VARIABLES
-        uniqueness_reaction=None,
-        execution_context="manual",
-        member=None,
-        source=None,
-        clear_execution_log=True,
-        record_execution_log=True,
-        linked_import_task=None,
+            self,
+            process_mode=None,
+            transaction_type=None,
+            default_values=None,
+            values=None,
+            recalculate_inputs=None,
+            value_errors=None,
+            general_errors=None,
+            instruments=None,
+            instruments_errors=None,
+            complex_transaction=None,
+            complex_transaction_status=None,
+            complex_transaction_errors=None,
+            transactions=None,
+            transactions_errors=None,
+            fake_id_gen=None,
+            transaction_order_gen=None,
+            now=None,
+            context=None,  # for formula engine
+            context_values=None,  # context_values = CONTEXT VARIABLES
+            uniqueness_reaction=None,
+            execution_context="manual",
+            member=None,
+            source=None,
+            clear_execution_log=True,
+            record_execution_log=True,
+            linked_import_task=None,
     ):
         _l.info(
             f"TransactionTypeProcess transaction_type={transaction_type} "
@@ -273,11 +273,22 @@ class TransactionTypeProcess:
                     return Client.objects.get(user_code=value)
                 elif issubclass(model_class, VaultRecord):
                     return VaultRecord.objects.get(user_code=value)
+                elif issubclass(model_class, Provider):
+                    return Provider.objects.get(user_code=value)
+                elif issubclass(model_class, ProviderVersion):
+                    return ProviderVersion.objects.get(user_code=value)
+                elif issubclass(model_class, Source):
+                    return Source.objects.get(user_code=value)
+                elif issubclass(model_class, SourceVersion):
+                    return SourceVersion.objects.get(user_code=value)
+                elif issubclass(model_class, PlatformVersion):
+                    return PlatformVersion.objects.get(user_code=value)
             except Exception:
                 _l.debug(f"Could not find default value relation {value}")
                 return None
 
-        def _get_val_by_model_cls_for_complex_transaction_input(master_user, obj, model_class):  # noqa: PLR0911, PLR0912
+        def _get_val_by_model_cls_for_complex_transaction_input(master_user, obj,
+                                                                model_class):  # noqa: PLR0911, PLR0912
             try:
                 if issubclass(model_class, Account):
                     return Account.objects.get(master_user=master_user, user_code=obj.value_relation)
@@ -315,6 +326,16 @@ class TransactionTypeProcess:
                     return Client.objects.get(user_code=obj.value_relation)
                 elif issubclass(model_class, VaultRecord):
                     return VaultRecord.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, Provider):
+                    return Provider.objects.get(user_code=value)
+                elif issubclass(model_class, ProviderVersion):
+                    return ProviderVersion.objects.get(user_code=value)
+                elif issubclass(model_class, Source):
+                    return Source.objects.get(user_code=value)
+                elif issubclass(model_class, SourceVersion):
+                    return SourceVersion.objects.get(user_code=value)
+                elif issubclass(model_class, PlatformVersion):
+                    return PlatformVersion.objects.get(user_code=value)
             except Exception:
                 _l.error(f"Could not find default value relation {obj.value_relation} ")
                 return None
@@ -346,8 +367,8 @@ class TransactionTypeProcess:
                 i = ci.transaction_type_input
                 value = None
                 if i.value_type in (
-                    TransactionTypeInput.STRING,
-                    TransactionTypeInput.SELECTOR,
+                        TransactionTypeInput.STRING,
+                        TransactionTypeInput.SELECTOR,
                 ):
                     value = ci.value_string
                 elif i.value_type == TransactionTypeInput.JSON:
@@ -434,7 +455,8 @@ class TransactionTypeProcess:
         for key, value in self.values.items():
             self.record_execution_progress(f"Key: {key}. Value: {value}. Type: {type(self.values[key]).__name__}")
 
-    def book_create_instruments(self, actions, master_user, instrument_map, pass_download=False):  # noqa: PLR0912, PLR0915
+    def book_create_instruments(self, actions, master_user, instrument_map,
+                                pass_download=False):  # noqa: PLR0912, PLR0915
         # object_permissions = self.transaction_type.object_permissions.select_related('permission').all()
         daily_pricing_model = DailyPricingModel.objects.get(pk=DailyPricingModel.SKIP)  # noqa: F841
 
@@ -474,10 +496,10 @@ class TransactionTypeProcess:
                 _l.debug(f"action_instrument.rebook_reaction {action_instrument.rebook_reaction} ")
 
                 if (
-                    not exist
-                    and isinstance(user_code, str)
-                    and action_instrument.rebook_reaction == RebookReactionChoice.TRY_DOWNLOAD_IF_ERROR_CREATE_DEFAULT
-                    and pass_download is False
+                        not exist
+                        and isinstance(user_code, str)
+                        and action_instrument.rebook_reaction == RebookReactionChoice.TRY_DOWNLOAD_IF_ERROR_CREATE_DEFAULT
+                        and pass_download is False
                 ):
                     try:
                         from poms.integrations.tasks import download_instrument_cbond
@@ -540,8 +562,8 @@ class TransactionTypeProcess:
                             )
 
                             if (
-                                action_instrument.rebook_reaction == RebookReactionChoice.FIND_OR_CREATE
-                                and self.process_mode == self.MODE_REBOOK
+                                    action_instrument.rebook_reaction == RebookReactionChoice.FIND_OR_CREATE
+                                    and self.process_mode == self.MODE_REBOOK
                             ):
                                 instrument = ecosystem_default.instrument
                                 instrument_exists = True
@@ -850,8 +872,8 @@ class TransactionTypeProcess:
                                     instrument = serializer.save()
 
                             if (
-                                rebook_reaction == RebookReactionChoice.TRY_DOWNLOAD_IF_ERROR_CREATE_DEFAULT
-                                and not instrument_exists
+                                    rebook_reaction == RebookReactionChoice.TRY_DOWNLOAD_IF_ERROR_CREATE_DEFAULT
+                                    and not instrument_exists
                             ):
                                 _l.debug("Book  TRY_DOWNLOAD_IF_ERROR_CREATE_DEFAULT")
 
@@ -999,7 +1021,7 @@ class TransactionTypeProcess:
                 action_instrument_manual_pricing_formula = None
 
             if action_instrument_manual_pricing_formula and self.execute_action_condition(
-                action_instrument_manual_pricing_formula
+                    action_instrument_manual_pricing_formula
             ):
                 _l.debug(
                     "process manual pricing formula: %s",
@@ -1119,7 +1141,7 @@ class TransactionTypeProcess:
                 action_instrument_accrual_calculation_schedule = None
 
             if action_instrument_accrual_calculation_schedule and self.execute_action_condition(
-                action_instrument_accrual_calculation_schedule
+                    action_instrument_accrual_calculation_schedule
             ):
                 _l.debug(
                     "process accrual calculation schedule: %s",
@@ -1487,7 +1509,7 @@ class TransactionTypeProcess:
                 action_instrument_event_schedule_action = None
 
             if action_instrument_event_schedule_action and self.execute_action_condition(
-                action_instrument_event_schedule_action
+                    action_instrument_event_schedule_action
             ):
                 errors = {}
 
@@ -1650,10 +1672,10 @@ class TransactionTypeProcess:
                     # _l.debug('result %s', result)
 
                 except (
-                    ValueError,
-                    TypeError,
-                    IntegrityError,
-                    formula.InvalidExpression,
+                        ValueError,
+                        TypeError,
+                        IntegrityError,
+                        formula.InvalidExpression,
                 ):
                     # _l.debug("Execute command execute_command.expr %s " % execute_command.expr)
                     # _l.debug("Execute command execute_command.names %s " % names)
@@ -1675,8 +1697,8 @@ class TransactionTypeProcess:
         account_result = any(
             perm.group.id == group.id
             and (
-                (transaction.account_position and transaction.account_position.id == perm.object_id)
-                and (transaction.account_cash and transaction.account_cash.id == perm.object_id)
+                    (transaction.account_position and transaction.account_position.id == perm.object_id)
+                    and (transaction.account_cash and transaction.account_cash.id == perm.object_id)
             )
             for perm in account_permissions
         )
@@ -2454,16 +2476,16 @@ class TransactionTypeProcess:
                 _l.error(f"execute_uniqueness_expression.is_rebook exist {repr(e)} ")
 
             if (
-                self.uniqueness_reaction == TransactionType.SKIP
-                and exist
-                and self.complex_transaction.transaction_unique_code
+                    self.uniqueness_reaction == TransactionType.SKIP
+                    and exist
+                    and self.complex_transaction.transaction_unique_code
             ):
                 self.skipped_book_unique_code_error()
 
             elif (
-                self.uniqueness_reaction == TransactionType.SKIP
-                and not exist
-                and self.complex_transaction.transaction_unique_code
+                    self.uniqueness_reaction == TransactionType.SKIP
+                    and not exist
+                    and self.complex_transaction.transaction_unique_code
             ):
                 # Just create complex transaction
                 self.uniqueness_status = "update"
@@ -2475,8 +2497,8 @@ class TransactionTypeProcess:
             elif self.uniqueness_reaction == TransactionType.BOOK_WITHOUT_UNIQUE_CODE:
                 self.book_without_unique_code()
             elif (
-                self.uniqueness_reaction == TransactionType.OVERWRITE
-                and self.complex_transaction.transaction_unique_code
+                    self.uniqueness_reaction == TransactionType.OVERWRITE
+                    and self.complex_transaction.transaction_unique_code
             ):
                 self.uniqueness_status = "overwrite"
 
@@ -2501,16 +2523,16 @@ class TransactionTypeProcess:
             _l.info(f"execute_uniqueness_expression.uniqueness_reaction={self.uniqueness_reaction} exist={exist}")
 
             if (
-                self.uniqueness_reaction == TransactionType.SKIP
-                and exist
-                and self.complex_transaction.transaction_unique_code
+                    self.uniqueness_reaction == TransactionType.SKIP
+                    and exist
+                    and self.complex_transaction.transaction_unique_code
             ):
                 self.skipped_book_unique_code_error()
 
             elif (
-                self.uniqueness_reaction == TransactionType.SKIP
-                and not exist
-                and self.complex_transaction.transaction_unique_code
+                    self.uniqueness_reaction == TransactionType.SKIP
+                    and not exist
+                    and self.complex_transaction.transaction_unique_code
             ):
                 # Just create complex transaction
                 self.uniqueness_status = "create"
@@ -2520,8 +2542,8 @@ class TransactionTypeProcess:
                 self.book_without_unique_code()
 
             elif (
-                self.uniqueness_reaction == TransactionType.OVERWRITE
-                and self.complex_transaction.transaction_unique_code
+                    self.uniqueness_reaction == TransactionType.OVERWRITE
+                    and self.complex_transaction.transaction_unique_code
             ):
                 if exist:
                     self.record_execution_progress(
@@ -2538,9 +2560,9 @@ class TransactionTypeProcess:
                     self.record_execution_progress("Unique Code is free, can create transaction (OVERWRITE)")
 
             elif (
-                self.uniqueness_reaction == TransactionType.TREAT_AS_ERROR
-                and exist
-                and self.complex_transaction.transaction_unique_code
+                    self.uniqueness_reaction == TransactionType.TREAT_AS_ERROR
+                    and exist
+                    and self.complex_transaction.transaction_unique_code
             ):
                 # TODO ask if behavior same as skip
                 self.uniqueness_status = "error"
@@ -3045,24 +3067,24 @@ class TransactionTypeProcess:
     @property
     def has_errors(self):
         return (
-            bool(self.instruments_errors)
-            or any(bool(e) for e in self.general_errors)
-            or any(bool(e) for e in self.value_errors)
-            or any(bool(e) for e in self.complex_transaction_errors)
-            or any(bool(e) for e in self.transactions_errors)
+                bool(self.instruments_errors)
+                or any(bool(e) for e in self.general_errors)
+                or any(bool(e) for e in self.value_errors)
+                or any(bool(e) for e in self.complex_transaction_errors)
+                or any(bool(e) for e in self.transactions_errors)
         )
 
     def _set_val(
-        self,
-        errors,
-        values,
-        default_value,
-        target,
-        target_attr_name,
-        source,
-        source_attr_name,
-        validator=None,
-        object_data=None,
+            self,
+            errors,
+            values,
+            default_value,
+            target,
+            target_attr_name,
+            source,
+            source_attr_name,
+            validator=None,
+            object_data=None,
     ):
         value = getattr(source, source_attr_name)
         if value:
@@ -3082,16 +3104,16 @@ class TransactionTypeProcess:
         setattr(target, target_attr_name, value)  # set computed value
 
     def _set_rel(
-        self,
-        errors,
-        values,
-        default_value,
-        target,
-        target_attr_name,
-        source,
-        source_attr_name,
-        model,
-        object_data=None,
+            self,
+            errors,
+            values,
+            default_value,
+            target,
+            target_attr_name,
+            source,
+            source_attr_name,
+            model,
+            object_data=None,
     ):
         user_code = getattr(source, source_attr_name, None)  # got user_code
         value = None
