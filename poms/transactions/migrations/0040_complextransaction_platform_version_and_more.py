@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('provenance', '0003_platformversion_created_at_and_more'),
-        ('transactions', '0038_remove_complextransaction_created_and_more'),
+        ('transactions', '0039_alter_transactiontypeinput_value_type'),
     ]
 
     operations = [
