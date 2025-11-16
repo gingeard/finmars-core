@@ -327,15 +327,15 @@ class TransactionTypeProcess:
                 elif issubclass(model_class, VaultRecord):
                     return VaultRecord.objects.get(user_code=obj.value_relation)
                 elif issubclass(model_class, Provider):
-                    return Provider.objects.get(user_code=value)
+                    return Provider.objects.get(user_code=obj.value_relation)
                 elif issubclass(model_class, ProviderVersion):
-                    return ProviderVersion.objects.get(user_code=value)
+                    return ProviderVersion.objects.get(user_code=obj.value_relation)
                 elif issubclass(model_class, Source):
-                    return Source.objects.get(user_code=value)
+                    return Source.objects.get(user_code=obj.value_relation)
                 elif issubclass(model_class, SourceVersion):
-                    return SourceVersion.objects.get(user_code=value)
+                    return SourceVersion.objects.get(user_code=obj.value_relation)
                 elif issubclass(model_class, PlatformVersion):
-                    return PlatformVersion.objects.get(user_code=value)
+                    return PlatformVersion.objects.get(user_code=obj.value_relation)
             except Exception:
                 _l.error(f"Could not find default value relation {obj.value_relation} ")
                 return None
@@ -2301,6 +2301,10 @@ class TransactionTypeProcess:
                     source_attr_name="platform_version",
                 )
 
+                # _l.info("transaction.values %s" % self.values)
+                # _l.info("transaction %s" % transaction)
+                # _l.info("transaction.provider %s" % transaction.provider)
+
                 transaction_date_source = "null"
 
                 if transaction.accounting_date is None:
@@ -2437,10 +2441,10 @@ class TransactionTypeProcess:
                 _result_for_log[field_key] = value
 
             except Exception as e:
-                _l.error(
-                    f"execute_user_fields_expressions: formula.safe_eval resulted in {repr(e)} "
-                    f"field {field_key} value {field_value} names {names} context {self._context}"
-                )
+                # _l.error(
+                #     f"execute_user_fields_expressions: formula.safe_eval resulted in {repr(e)} "
+                #     f"field {field_key} value {field_value} names {names} context {self._context}"
+                # )
                 setattr(self.complex_transaction, field_key, None)
                 _result_for_log[field_key] = f"value {field_value} error {e}"
 
@@ -3229,8 +3233,8 @@ class TransactionTypeProcess:
         if user_code:
             # convert to id
             if model:
-                # _l.debug('_set_rel model %s ' % model)
-                # _l.debug('_set_rel value %s ' % user_code)
+                # _l.debug("_set_rel model %s " % model)
+                # _l.debug("_set_rel value %s " % user_code)
 
                 try:
                     if model._meta.get_field("master_user"):
@@ -3246,6 +3250,10 @@ class TransactionTypeProcess:
                         _l.debug(f"User code for default value is not found {e}")
         else:
             from_input = getattr(source, f"{source_attr_name}_input")
+
+            # _l.debug("_set_rel source %s " % source)
+            # _l.debug("_set_rel source_attr_name %s " % source_attr_name)
+            # _l.debug("_set_rel from_input %s " % from_input)
             if from_input:
                 # _l.debug('_set_rel values %s ' % values)
 
@@ -3257,6 +3265,8 @@ class TransactionTypeProcess:
 
             if object_data:
                 object_data[target_attr_name] = value.id
+
+        # _l.info("setrel.value %s" % value)
 
     def _set_eval_error(self, errors, attr_name, expression, exc=None):
         msg = gettext_lazy('Invalid expression "%(expression)s".') % {
