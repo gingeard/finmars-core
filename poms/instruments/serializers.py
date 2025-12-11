@@ -68,6 +68,7 @@ from poms.instruments.models import (
 )
 from poms.obj_attrs.serializers import ModelWithAttributesSerializer
 from poms.pricing.models import PriceHistoryError
+from poms.provenance.serializers import ModelWithProvenanceSerializer
 from poms.system_messages.handlers import send_system_message
 from poms.transactions.fields import TransactionTypeField
 from poms.transactions.models import TransactionType
@@ -954,6 +955,7 @@ class InstrumentSerializer(
     ModelWithUserCodeSerializer,
     ModelWithTimeStampSerializer,
     ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
     pricing_currency = CurrencyField()
@@ -1652,6 +1654,7 @@ AUTOCALCULATE_ACTIONS = {
 }
 
 
+<<<<<<< HEAD
 class PriceHistoryLightSerializer(ModelMetaSerializer):
     instrument_object = InstrumentUserCodeOnlySerializer(source="instrument", read_only=True)
     pricing_policy_object = PricingPolicyUserCodeOnlySerializer(
@@ -1685,6 +1688,9 @@ class PriceHistoryLightSerializer(ModelMetaSerializer):
 
 
 class PriceHistorySerializer(ModelMetaSerializer, ModelWithObjectStateSerializer):
+=======
+class PriceHistorySerializer(ModelMetaSerializer, ModelWithObjectStateSerializer, ModelWithProvenanceSerializer):
+>>>>>>> main
     instrument = InstrumentField()
     instrument_object = InstrumentViewSerializer(source="instrument", read_only=True)
     pricing_policy = PricingPolicyField(allow_null=False)

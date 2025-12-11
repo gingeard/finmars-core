@@ -11,6 +11,7 @@ from rest_framework.fields import empty
 
 from poms.accounts.fields import AccountDefault, AccountField
 from poms.accounts.models import Account
+from poms.clients.models import Client
 from poms.common.fields import ExpressionField, name_validator
 from poms.common.models import EXPRESSION_FIELD_LENGTH
 from poms.common.serializers import (
@@ -55,6 +56,8 @@ from poms.integrations.models import PriceDownloadScheme
 from poms.obj_attrs.serializers import ModelWithAttributesSerializer
 from poms.portfolios.fields import PortfolioDefault, PortfolioField
 from poms.portfolios.models import Portfolio
+from poms.provenance.models import PlatformVersion, Provider, ProviderVersion, Source, SourceVersion
+from poms.provenance.serializers import ModelWithProvenanceSerializer
 from poms.reconciliation.models import TransactionTypeReconField
 from poms.reconciliation.serializers import (
     ReconciliationComplexTransactionFieldSerializer,
@@ -70,6 +73,7 @@ from poms.strategies.fields import (
 )
 from poms.strategies.models import Strategy1, Strategy2, Strategy3
 from poms.transactions.fields import (
+    CharOrJSONField,
     ReadOnlyContentTypeField,
     TransactionTypeGroupField,
     TransactionTypeInputContentTypeField,
@@ -101,6 +105,7 @@ from poms.transactions.models import (
 )
 from poms.users.fields import HiddenMemberField, MasterUserField
 from poms.users.utils import get_member_from_context
+from poms.vault.models import VaultRecord
 
 _l = logging.getLogger("poms.transactions")
 
@@ -675,6 +680,28 @@ class TransactionTypeActionTransactionSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+
+    provider_input = TransactionInputField(
+        required=False,
+        allow_null=True,
+    )
+    provider_version_input = TransactionInputField(
+        required=False,
+        allow_null=True,
+    )
+    source_input = TransactionInputField(
+        required=False,
+        allow_null=True,
+    )
+    source_version_input = TransactionInputField(
+        required=False,
+        allow_null=True,
+    )
+    platform_version_input = TransactionInputField(
+        required=False,
+        allow_null=True,
+    )
+
     linked_instrument_input = TransactionInputField(
         required=False,
         allow_null=True,
@@ -847,6 +874,16 @@ class TransactionTypeActionTransactionSerializer(serializers.ModelSerializer):
             "responsible_input",
             "counterparty",
             "counterparty_input",
+            "provider",
+            "provider_input",
+            "provider_version",
+            "provider_version_input",
+            "source",
+            "source_input",
+            "source_version",
+            "source_version_input",
+            "platform_version",
+            "platform_version_input",
             "factor",
             "trade_price",
             "position_amount",
@@ -906,6 +943,7 @@ class TransactionTypeActionTransactionSerializer(serializers.ModelSerializer):
         from poms.instruments.serializers import InstrumentViewSerializer
         from poms.portfolios.models import Portfolio
         from poms.portfolios.serializers import PortfolioViewSerializer
+        from poms.provenance.serializers import ProviderSerializer
         from poms.strategies.models import Strategy1, Strategy2, Strategy3
         from poms.strategies.serializers import (
             Strategy1ViewSerializer,
@@ -1034,6 +1072,14 @@ class TransactionTypeActionTransactionSerializer(serializers.ModelSerializer):
             "allocation_pl",
             Instrument,
             InstrumentViewSerializer,
+        )
+
+        representation["provider_object"] = self.lookup_for_relation_object(
+            master_user,
+            representation,
+            "provider",
+            Provider,
+            ProviderSerializer,
         )
 
         return representation
@@ -3400,7 +3446,7 @@ class TransactionSimpleSerializer(serializers.ModelSerializer):
         ]
 
 
-class TransactionSerializer(serializers.ModelSerializer):
+class TransactionSerializer(ModelWithProvenanceSerializer):
     master_user = MasterUserField()
     complex_transaction = serializers.PrimaryKeyRelatedField(read_only=True)
     complex_transaction_order = serializers.IntegerField(read_only=True)
@@ -3808,7 +3854,9 @@ def remove_user_fields_from_representation(data: dict) -> dict:
     return data
 
 
-class ComplexTransactionSerializer(ModelWithAttributesSerializer, ModelWithTimeStampSerializer, ModelMetaSerializer):
+class ComplexTransactionSerializer(
+    ModelWithAttributesSerializer, ModelWithTimeStampSerializer, ModelMetaSerializer, ModelWithProvenanceSerializer
+):
     master_user = MasterUserField()
     transaction_type = serializers.PrimaryKeyRelatedField(read_only=True)
     transactions = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
@@ -4216,6 +4264,8 @@ class ComplexTransactionEvItemSerializer(ModelWithAttributesSerializer):
 class TransactionTypeProcessValuesSerializer(serializers.Serializer):
     def __init__(self, **kwargs):  # noqa: PLR0912, PLR0915
         from poms.accounts.serializers import AccountViewSerializer
+        from poms.clients.fields import ClientField
+        from poms.clients.serializers import ClientSerializer
         from poms.counterparties.serializers import (
             CounterpartyViewSerializer,
             ResponsibleViewSerializer,
@@ -4231,11 +4281,27 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
         )
         from poms.integrations.serializers import PriceDownloadSchemeViewSerializer
         from poms.portfolios.serializers import PortfolioViewSerializer
+        from poms.provenance.fields import (
+            PlatformVersionField,
+            ProviderField,
+            ProviderVersionField,
+            SourceField,
+            SourceVersionField,
+        )
+        from poms.provenance.serializers import (
+            PlatformVersionSerializer,
+            ProviderSerializer,
+            ProviderVersionSerializer,
+            SourceSerializer,
+            SourceVersionSerializer,
+        )
         from poms.strategies.serializers import (
             Strategy1ViewSerializer,
             Strategy2ViewSerializer,
             Strategy3ViewSerializer,
         )
+        from poms.vault.fields import VaultRecordField
+        from poms.vault.serializers import VaultRecordSerializer
 
         super().__init__(**kwargs)
 
@@ -4247,10 +4313,7 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
             field = None
             field_object = None
 
-            if i.value_type in (
-                TransactionTypeInput.STRING,
-                TransactionTypeInput.SELECTOR,
-            ):
+            if i.value_type in (TransactionTypeInput.STRING, TransactionTypeInput.SELECTOR):
                 field = serializers.CharField(
                     required=False,
                     allow_blank=True,
@@ -4258,7 +4321,8 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
                     label=i.name,
                     help_text=i.verbose_name,
                 )
-
+            elif i.value_type == TransactionTypeInput.JSON:
+                field = CharOrJSONField(required=False, allow_null=True)
             elif i.value_type == TransactionTypeInput.NUMBER:
                 field = serializers.FloatField(
                     required=False,
@@ -4456,6 +4520,76 @@ class TransactionTypeProcessValuesSerializer(serializers.Serializer):
                         help_text=i.verbose_name,
                     )
                     field_object = EventScheduleSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, Client):
+                    field = ClientField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = ClientSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, VaultRecord):
+                    field = VaultRecordField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = VaultRecordSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, Provider):
+                    field = ProviderField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = ProviderSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, ProviderVersion):
+                    field = ProviderVersionField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = ProviderVersionSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, Source):
+                    field = SourceField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = SourceSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, SourceVersion):
+                    field = SourceVersionField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = SourceVersionSerializer(source=name, read_only=True)
+
+                elif issubclass(model_class, PlatformVersion):
+                    field = PlatformVersionField(
+                        required=False,
+                        allow_null=True,
+                        label=i.name,
+                        help_text=i.verbose_name,
+                    )
+
+                    field_object = PlatformVersionSerializer(source=name, read_only=True)
 
             elif i.value_type == TransactionTypeInput.BUTTON:
                 field = serializers.JSONField(allow_null=True, required=False)
@@ -4710,6 +4844,7 @@ class ComplexTransactionViewOnly:
             if i.value_type in (
                 TransactionTypeInput.STRING,
                 TransactionTypeInput.SELECTOR,
+                TransactionTypeInput.JSON,
             ):
                 value = ci.value_string
             elif i.value_type == TransactionTypeInput.NUMBER:
@@ -4762,6 +4897,20 @@ class ComplexTransactionViewOnly:
                 return EventClass.objects.get(user_code=obj.value_relation)
             elif issubclass(model_class, NotificationClass):
                 return NotificationClass.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, Client):
+                return Client.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, VaultRecord):
+                return VaultRecord.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, Provider):
+                return Provider.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, ProviderVersion):
+                return ProviderVersion.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, Source):
+                return Source.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, SourceVersion):
+                return SourceVersion.objects.get(user_code=obj.value_relation)
+            elif issubclass(model_class, PlatformVersion):
+                return PlatformVersion.objects.get(user_code=obj.value_relation)
 
         except Exception:
             _l.info(f"Could not find default value relation {obj.value_relation} ")

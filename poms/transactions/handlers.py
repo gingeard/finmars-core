@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy
 from rest_framework.exceptions import ValidationError
 
 from poms.accounts.models import Account
+from poms.clients.models import Client
 from poms.common.utils import date_now, format_float, format_float_to_2
 from poms.counterparties.models import Counterparty, Responsible
 from poms.currencies.models import Currency
@@ -33,6 +34,7 @@ from poms.instruments.models import (
     PricingPolicy,
 )
 from poms.portfolios.models import Portfolio
+from poms.provenance.models import PlatformVersion, Provider, ProviderVersion, Source, SourceVersion
 from poms.reconciliation.models import TransactionTypeReconField
 from poms.strategies.models import Strategy1, Strategy2, Strategy3
 from poms.system_messages.handlers import send_system_message
@@ -46,8 +48,9 @@ from poms.transactions.models import (
     TransactionType,
     TransactionTypeInput,
 )
-from poms.transactions.utils import generate_user_fields
+from poms.transactions.utils import _read_json_text, generate_user_fields
 from poms.users.models import EcosystemDefault
+from poms.vault.models import VaultRecord
 
 _l = logging.getLogger("poms.transactions")
 
@@ -164,6 +167,9 @@ class TransactionTypeProcess:
         if complex_transaction and not complex_transaction_status:
             self.complex_transaction_status = complex_transaction.status_id
 
+        if self.clear_execution_log:
+            self.complex_transaction.execution_log = ""
+
         self._context = context
         self._context["transaction_type"] = self.transaction_type
         self._id_seq = 0
@@ -177,9 +183,6 @@ class TransactionTypeProcess:
             self.values = values
             for i in range(10):
                 self.values[f"phantom_instrument_{i}"] = None
-
-        if self.clear_execution_log:
-            self.complex_transaction.execution_log = ""
 
         self.complex_transaction.owner = self.member
         # self.complex_transaction.save()  # it will create empty transaction in db!
@@ -267,6 +270,20 @@ class TransactionTypeProcess:
                     return EventClass.objects.get(user_code=value)
                 elif issubclass(model_class, NotificationClass):
                     return NotificationClass.objects.get(user_code=value)
+                elif issubclass(model_class, Client):
+                    return Client.objects.get(user_code=value)
+                elif issubclass(model_class, VaultRecord):
+                    return VaultRecord.objects.get(user_code=value)
+                elif issubclass(model_class, Provider):
+                    return Provider.objects.get(user_code=value)
+                elif issubclass(model_class, ProviderVersion):
+                    return ProviderVersion.objects.get(user_code=value)
+                elif issubclass(model_class, Source):
+                    return Source.objects.get(user_code=value)
+                elif issubclass(model_class, SourceVersion):
+                    return SourceVersion.objects.get(user_code=value)
+                elif issubclass(model_class, PlatformVersion):
+                    return PlatformVersion.objects.get(user_code=value)
             except Exception:
                 _l.debug(f"Could not find default value relation {value}")
                 return None
@@ -305,6 +322,20 @@ class TransactionTypeProcess:
                     return EventClass.objects.get(user_code=obj.value_relation)
                 elif issubclass(model_class, NotificationClass):
                     return NotificationClass.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, Client):
+                    return Client.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, VaultRecord):
+                    return VaultRecord.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, Provider):
+                    return Provider.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, ProviderVersion):
+                    return ProviderVersion.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, Source):
+                    return Source.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, SourceVersion):
+                    return SourceVersion.objects.get(user_code=obj.value_relation)
+                elif issubclass(model_class, PlatformVersion):
+                    return PlatformVersion.objects.get(user_code=obj.value_relation)
             except Exception:
                 _l.error(f"Could not find default value relation {obj.value_relation} ")
                 return None
@@ -340,6 +371,9 @@ class TransactionTypeProcess:
                     TransactionTypeInput.SELECTOR,
                 ):
                     value = ci.value_string
+                elif i.value_type == TransactionTypeInput.JSON:
+                    value = _read_json_text(ci.value_string)
+                    _l.info("JSON read: %r type=%s", value, type(value).__name__ if value is not None else None)
                 elif i.value_type == TransactionTypeInput.NUMBER:
                     value = ci.value_float
                 elif i.value_type == TransactionTypeInput.DATE:
@@ -353,7 +387,7 @@ class TransactionTypeProcess:
                 if value is not None:
                     self.values[i.name] = value
 
-        # _l.debug('self.inputs %s' % self.inputs)
+        # _l.debug('before self.values %s' % self.values)
 
         self.record_execution_progress("==== COMPLEX TRANSACTION VALUES ====", self.values)
 
@@ -415,6 +449,8 @@ class TransactionTypeProcess:
                     _l.debug(f"Value is not set. No Context. No Default. input {i.name} ")
 
         self.record_execution_progress("==== CALCULATED INPUTS ====")
+
+        # _l.info("check values %s" % self.values)
 
         for key, value in self.values.items():
             self.record_execution_progress(f"Key: {key}. Value: {value}. Type: {type(self.values[key]).__name__}")
@@ -781,6 +817,61 @@ class TransactionTypeProcess:
                             target_attr_name="maturity_price",
                             source=action_instrument,
                             source_attr_name="maturity_price",
+                            object_data=object_data,
+                        )
+
+                        self._set_rel(
+                            errors=errors,
+                            values=self.values,
+                            model=Provider,
+                            target=instrument,
+                            target_attr_name="provider",
+                            source=action_instrument,
+                            source_attr_name="provider",
+                            object_data=object_data,
+                        )
+
+                        self._set_rel(
+                            errors=errors,
+                            values=self.values,
+                            model=ProviderVersion,
+                            target=instrument,
+                            target_attr_name="provider_version",
+                            source=action_instrument,
+                            source_attr_name="provider_version",
+                            object_data=object_data,
+                        )
+
+                        self._set_rel(
+                            errors=errors,
+                            values=self.values,
+                            model=Source,
+                            target=instrument,
+                            target_attr_name="source",
+                            source=action_instrument,
+                            source_attr_name="source",
+                            object_data=object_data,
+                        )
+
+                        self._set_rel(
+                            errors=errors,
+                            values=self.values,
+                            model=SourceVersion,
+                            target=instrument,
+                            target_attr_name="source_version",
+                            source=action_instrument,
+                            source_attr_name="source_version",
+                            object_data=object_data,
+                        )
+
+                        self._set_rel(
+                            errors=errors,
+                            values=self.values,
+                            model=PlatformVersion,
+                            target=instrument,
+                            target_attr_name="platform_version",
+                            source=action_instrument,
+                            source_attr_name="platform_version",
                             object_data=object_data,
                         )
 
@@ -2155,6 +2246,65 @@ class TransactionTypeProcess:
                         source_attr_name="is_canceled",
                     )
 
+                self._set_rel(
+                    errors=errors,
+                    values=self.values,
+                    default_value=None,
+                    model=Provider,
+                    target=transaction,
+                    target_attr_name="provider",
+                    source=action_transaction,
+                    source_attr_name="provider",
+                )
+
+                self._set_rel(
+                    errors=errors,
+                    values=self.values,
+                    default_value=None,
+                    model=ProviderVersion,
+                    target=transaction,
+                    target_attr_name="provider_version",
+                    source=action_transaction,
+                    source_attr_name="provider_version",
+                )
+
+                self._set_rel(
+                    errors=errors,
+                    values=self.values,
+                    default_value=None,
+                    model=Source,
+                    target=transaction,
+                    target_attr_name="source",
+                    source=action_transaction,
+                    source_attr_name="source",
+                )
+
+                self._set_rel(
+                    errors=errors,
+                    values=self.values,
+                    default_value=None,
+                    model=SourceVersion,
+                    target=transaction,
+                    target_attr_name="source_version",
+                    source=action_transaction,
+                    source_attr_name="source_version",
+                )
+
+                self._set_rel(
+                    errors=errors,
+                    values=self.values,
+                    default_value=None,
+                    model=PlatformVersion,
+                    target=transaction,
+                    target_attr_name="platform_version",
+                    source=action_transaction,
+                    source_attr_name="platform_version",
+                )
+
+                # _l.info("transaction.values %s" % self.values)
+                # _l.info("transaction %s" % transaction)
+                # _l.info("transaction.provider %s" % transaction.provider)
+
                 transaction_date_source = "null"
 
                 if transaction.accounting_date is None:
@@ -2215,13 +2365,26 @@ class TransactionTypeProcess:
             ci.complex_transaction = self.complex_transaction
             ci.transaction_type_input = ti
 
-            if ti.value_type in (
-                TransactionTypeInput.STRING,
-                TransactionTypeInput.SELECTOR,
-            ):
+            if ti.value_type in (TransactionTypeInput.STRING, TransactionTypeInput.SELECTOR):
                 if val is None:
                     val = ""
                 ci.value_string = val
+            elif ti.value_type == TransactionTypeInput.JSON:
+                # val may be dict/list OR already a JSON string
+                if val is None:
+                    ci.value_string = ""
+                elif isinstance(val, dict):
+                    ci.value_string = json.dumps(val, ensure_ascii=False, separators=(",", ":"))
+                elif isinstance(val, str):
+                    # keep if it is valid JSON; else wrap it as JSON string
+                    try:
+                        json.loads(val)
+                        ci.value_string = val
+                    except json.JSONDecodeError:
+                        ci.value_string = json.dumps(val, ensure_ascii=False)
+                else:
+                    # numbers, bools, etc. -> store valid JSON
+                    ci.value_string = json.dumps(val, ensure_ascii=False)
             elif ti.value_type == TransactionTypeInput.NUMBER:
                 if val is None:
                     val = 0.0
@@ -2249,8 +2412,20 @@ class TransactionTypeProcess:
             "transactions": trns,
         }
 
+        # do not remove, somehow json inputs are always strings, which leads to impossiblity to address by keys
+        for i in self.inputs:
+            if i.value_type == TransactionTypeInput.JSON:
+                val = self.values.get(i.name)
+                if isinstance(val, str):
+                    try:
+                        self.values[i.name] = json.loads(val)
+                    except json.JSONDecodeError:
+                        _l.error("execute_user_fields_expressions decode error")
+
         for key, value in self.values.items():
             names[key] = value
+
+        # _l.info('before names %s' % names)
 
         self.record_execution_progress("Calculating User Fields")
 
@@ -2266,10 +2441,10 @@ class TransactionTypeProcess:
                 _result_for_log[field_key] = value
 
             except Exception as e:
-                _l.error(
-                    f"execute_user_fields_expressions: formula.safe_eval resulted in {repr(e)} "
-                    f"field {field_key} value {field_value} names {names} context {self._context}"
-                )
+                # _l.error(
+                #     f"execute_user_fields_expressions: formula.safe_eval resulted in {repr(e)} "
+                #     f"field {field_key} value {field_value} names {names} context {self._context}"
+                # )
                 setattr(self.complex_transaction, field_key, None)
                 _result_for_log[field_key] = f"value {field_value} error {e}"
 
@@ -3058,8 +3233,8 @@ class TransactionTypeProcess:
         if user_code:
             # convert to id
             if model:
-                # _l.debug('_set_rel model %s ' % model)
-                # _l.debug('_set_rel value %s ' % user_code)
+                # _l.debug("_set_rel model %s " % model)
+                # _l.debug("_set_rel value %s " % user_code)
 
                 try:
                     if model._meta.get_field("master_user"):
@@ -3075,6 +3250,10 @@ class TransactionTypeProcess:
                         _l.debug(f"User code for default value is not found {e}")
         else:
             from_input = getattr(source, f"{source_attr_name}_input")
+
+            # _l.debug("_set_rel source %s " % source)
+            # _l.debug("_set_rel source_attr_name %s " % source_attr_name)
+            # _l.debug("_set_rel from_input %s " % from_input)
             if from_input:
                 # _l.debug('_set_rel values %s ' % values)
 
@@ -3086,6 +3265,8 @@ class TransactionTypeProcess:
 
             if object_data:
                 object_data[target_attr_name] = value.id
+
+        # _l.info("setrel.value %s" % value)
 
     def _set_eval_error(self, errors, attr_name, expression, exc=None):
         msg = gettext_lazy('Invalid expression "%(expression)s".') % {
