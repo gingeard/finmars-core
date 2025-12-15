@@ -143,19 +143,15 @@ class CurrencyViewSerializer(ModelWithUserCodeSerializer):
         ]
 
 
-<<<<<<< HEAD
 class CurrencyUserCodeOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = Currency
         fields = ["user_code"]
 
 
-class CurrencyHistorySerializer(ModelMetaSerializer, ModelWithTimeStampSerializer, ModelWithObjectStateSerializer):
-=======
 class CurrencyHistorySerializer(
     ModelMetaSerializer, ModelWithTimeStampSerializer, ModelWithObjectStateSerializer, ModelWithProvenanceSerializer
 ):
->>>>>>> main
     currency = CurrencyField()
     currency_object = CurrencyViewSerializer(source="currency", read_only=True)
     pricing_policy = PricingPolicyField(allow_null=False)
@@ -268,7 +264,7 @@ class CurrencyHistoryLightSerializer(ModelMetaSerializer):
     currency_object = serializers.SerializerMethodField()
     pricing_policy_object = serializers.SerializerMethodField()
     fx_rate = FloatEvalField()
-    procedure_modified_datetime = ReadOnlyField()   
+    procedure_modified_datetime = ReadOnlyField()
 
     class Meta:
         model = CurrencyHistory

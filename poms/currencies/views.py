@@ -25,8 +25,8 @@ from poms.currencies.filters import (
 )
 from poms.currencies.models import Currency, CurrencyHistory
 from poms.currencies.serializers import (
-    CurrencyHistorySerializer,
     CurrencyHistoryLightSerializer,
+    CurrencyHistorySerializer,
     CurrencyLightSerializer,
     CurrencySerializer,
 )

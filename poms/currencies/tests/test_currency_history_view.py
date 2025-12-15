@@ -84,9 +84,7 @@ class CurrencyHistoryViewSetTest(BaseTestCase):
         result = response_json["results"][0]
 
         self.assertIsInstance(result["currency_object"], dict)
-        self.assertEqual(
-            result["currency_object"]["user_code"], currency_history.currency.user_code
-        )
+        self.assertEqual(result["currency_object"]["user_code"], currency_history.currency.user_code)
 
         self.assertIsInstance(result["pricing_policy_object"], dict)
         self.assertEqual(

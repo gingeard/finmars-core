@@ -1654,12 +1654,9 @@ AUTOCALCULATE_ACTIONS = {
 }
 
 
-<<<<<<< HEAD
 class PriceHistoryLightSerializer(ModelMetaSerializer):
     instrument_object = InstrumentUserCodeOnlySerializer(source="instrument", read_only=True)
-    pricing_policy_object = PricingPolicyUserCodeOnlySerializer(
-        source="pricing_policy", read_only=True
-    )
+    pricing_policy_object = PricingPolicyUserCodeOnlySerializer(source="pricing_policy", read_only=True)
     principal_price = FloatEvalField()
     accrued_price = AutocalculateFloatEvalField()
     procedure_modified_datetime = ReadOnlyField()
@@ -1687,10 +1684,7 @@ class PriceHistoryLightSerializer(ModelMetaSerializer):
         ]
 
 
-class PriceHistorySerializer(ModelMetaSerializer, ModelWithObjectStateSerializer):
-=======
 class PriceHistorySerializer(ModelMetaSerializer, ModelWithObjectStateSerializer, ModelWithProvenanceSerializer):
->>>>>>> main
     instrument = InstrumentField()
     instrument_object = InstrumentViewSerializer(source="instrument", read_only=True)
     pricing_policy = PricingPolicyField(allow_null=False)

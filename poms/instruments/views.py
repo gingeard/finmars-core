@@ -100,13 +100,13 @@ from poms.instruments.serializers import (
     PaymentSizeDetailSerializer,
     PeriodicitySerializer,
     PriceHistoryCalculateSerializer,
+    PriceHistoryLightSerializer,
     PriceHistoryRecalculateSerializer,
     PriceHistorySerializer,
     PricingConditionSerializer,
     PricingPolicyLightSerializer,
     PricingPolicySerializer,
     ShortUnderlyingExposureSerializer,
-    PriceHistoryLightSerializer,
 )
 from poms.instruments.tasks import (
     calculate_pricehistory,
@@ -1628,7 +1628,7 @@ class PriceHistoryViewSet(AbstractModelViewSet):
             # return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(status=status.HTTP_201_CREATED)
-    
+
     @action(
         detail=False,
         methods=["get"],
