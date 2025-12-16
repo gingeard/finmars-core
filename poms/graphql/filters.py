@@ -13,7 +13,9 @@ from poms.instruments.models import Country as CountryModel
 from poms.instruments.models import Instrument as InstrumentModel
 from poms.instruments.models import InstrumentType as InstrumentTypeModel
 from poms.instruments.models import PriceHistory as PriceHistoryModel
+from poms.instruments.models import PricingPolicy as PricingPolicyModel
 from poms.portfolios.models import Portfolio as PortfolioModel
+from poms.portfolios.models import PortfolioHistory as PortfolioHistoryModel
 from poms.strategies.models import Strategy1 as Strategy1Model
 from poms.strategies.models import Strategy2 as Strategy2Model
 from poms.strategies.models import Strategy3 as Strategy3Model
@@ -72,13 +74,32 @@ CountryFilter = make_filter(CountryModel)
 AccountTypeFilter = make_filter(AccountTypeModel)
 AccountFilter = make_filter(AccountModel, extra_fields={"type": AccountTypeFilter})
 
+PricingPolicyFilter = make_filter(PricingPolicyModel)
 
 CurrencyFilter = make_filter(CurrencyModel, extra_fields={"country": CountryFilter | None})
 CurrencyHistoryFilter = make_filter(
-    CurrencyHistoryModel, extra_fields={"date": FilterLookup[date] | None, "currency": CurrencyFilter | None}
+    CurrencyHistoryModel,
+    extra_fields={
+        "date": FilterLookup[date] | None,
+        "currency": CurrencyFilter | None,
+        "pricing_policy": PricingPolicyFilter | None,
+    },
 )
 
 PortfolioFilter = make_filter(PortfolioModel)
+
+PortfolioHistoryFilter = make_filter(
+    PortfolioHistoryModel,
+    extra_fields={
+        "date": FilterLookup[date] | None,
+        "period_type": FilterLookup[str] | None,
+        "status": FilterLookup[str] | None,
+        "portfolio": PortfolioFilter | None,
+        "currency": CurrencyFilter | None,
+        "pricing_policy": PricingPolicyFilter | None,
+    },
+)
+
 InstrumentTypeFilter = make_filter(InstrumentTypeModel)
 InstrumentFilter = make_filter(
     InstrumentModel,
@@ -92,7 +113,12 @@ InstrumentFilter = make_filter(
 )
 
 PriceHistoryFilter = make_filter(
-    PriceHistoryModel, extra_fields={"date": FilterLookup[date] | None, "instrument": InstrumentFilter | None}
+    PriceHistoryModel,
+    extra_fields={
+        "date": FilterLookup[date] | None,
+        "instrument": InstrumentFilter | None,
+        "pricing_policy": PricingPolicyFilter | None,
+    },
 )
 
 ResponsibleFilter = make_filter(ResponsibleModel)
