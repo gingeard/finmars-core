@@ -1,8 +1,11 @@
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.views.decorators.csrf import csrf_exempt
 
 from healthcheck.views import HealthcheckView
+from poms.graphql.schema import schema
+from poms.graphql.views import AuthGraphQLView
 from poms_app.openapi import get_redoc_urlpatterns
 
 urlpatterns = []
@@ -20,6 +23,7 @@ urlpatterns = urlpatterns + [
     re_path(r"^(?P<space_code>[^/]+)/healthcheck", HealthcheckView.as_view()),
     re_path(r"^(?P<space_code>[^/]+)/healthz", HealthcheckView.as_view()),  # needed for k8s healthcheck
     # New Approach
+    path("<slug:realm_code>/<slug:space_code>/graphql/", csrf_exempt(AuthGraphQLView.as_view(schema=schema))),
     path("<slug:realm_code>/<slug:space_code>/api/", include("poms.api.urls")),
     path("<slug:realm_code>/<slug:space_code>/healthcheck/", HealthcheckView.as_view()),
     path("<slug:realm_code>/<slug:space_code>/healthz/", HealthcheckView.as_view()),  # needed for k8s healthcheck
