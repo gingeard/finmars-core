@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 from datetime import date
-from typing import Type, TypeVar, Any
+from typing import Any, TypeVar
 
 import strawberry
 import strawberry_django
@@ -25,12 +25,14 @@ from poms.graphql.filters import (
     InstrumentFilter,
     InstrumentTypeFilter,
     PortfolioFilter,
+    PortfolioHistoryFilter,
     PriceHistoryFilter,
+    PricingPolicyFilter,
     ResponsibleFilter,
     Strategy1Filter,
     Strategy2Filter,
     Strategy3Filter,
-    TransactionFilter, PricingPolicyFilter, PortfolioHistoryFilter,
+    TransactionFilter,
 )
 from poms.instruments.models import CostMethod as CostMethodModel
 from poms.instruments.models import Country as CountryModel
@@ -45,8 +47,11 @@ from poms.portfolios.models import PortfolioRegister as PortfolioRegisterModel
 from poms.reports.common import PerformanceReport as PerformanceReportModel
 from poms.reports.common import Report as ReportModel
 from poms.reports.common import TransactionReport as TransactionReportModel
-from poms.reports.serializers_helpers import serialize_balance_report_item, serialize_pl_report_item, \
-    serialize_transaction_report_item
+from poms.reports.serializers_helpers import (
+    serialize_balance_report_item,
+    serialize_pl_report_item,
+    serialize_transaction_report_item,
+)
 from poms.reports.sql_builders.balance import BalanceReportBuilderSql
 from poms.reports.sql_builders.pl import PLReportBuilderSql
 from poms.reports.sql_builders.transaction import TransactionReportBuilderSql
@@ -81,7 +86,7 @@ def gql_type(model):
     )
 
 
-def from_dict(cls: Type[T], data: dict[str, Any]) -> T:
+def from_dict(cls: type[T], data: dict[str, Any]) -> T:
     # keeps only fields declared in the strawberry/dataclass type
     allowed = {f.name for f in dataclasses.fields(cls)}
     filtered = {k: v for k, v in data.items() if k in allowed}
@@ -239,6 +244,7 @@ class Transaction:
 
 # BALANCE REPORT STARTS
 
+
 @strawberry.input
 class BalanceReportInput:
     report_date: date
@@ -355,41 +361,41 @@ class BalanceReport:
 
 @strawberry.field
 def balance_report(
-        self,
-        info,
-        input: BalanceReportInput,
-        limit: int = 50,
-        offset: int = 0,
+    self,
+    info,
+    input: BalanceReportInput,
+    limit: int = 50,
+    offset: int = 0,
 ) -> BalanceReport:
     user = info.context.request.user
 
     report_currency = CurrencyModel.objects.get(user_code=input.report_currency)
     pricing_policy = PricingPolicyModel.objects.get(user_code=input.pricing_policy)
 
+    portfolios = []
+
     if input.portfolios:
         portfolios = PortfolioModel.objects.filter(user_code__in=input.portfolios)
-    else:
-        portfolios = []
+
+    accounts = []
 
     if input.accounts:
         accounts = AccountModel.objects.filter(user_code__in=input.accounts)
-    else:
-        accounts = []
+
+    strategies1 = []
 
     if input.strategies1:
         strategies1 = Strategy1Model.objects.filter(user_code__in=input.strategies1)
-    else:
-        strategies1 = []
+
+    strategies2 = []
 
     if input.strategies2:
         strategies2 = Strategy2Model.objects.filter(user_code__in=input.strategies2)
-    else:
-        strategies2 = []
+
+    strategies3 = []
 
     if input.strategies3:
         strategies3 = Strategy3Model.objects.filter(user_code__in=input.strategies3)
-    else:
-        strategies3 = []
 
     cost_method = CostMethodModel.objects.get(user_code="avco")
 
@@ -398,54 +404,49 @@ def balance_report(
 
     portfolio_mode = 1
 
-    if input.portfolio_mode == 'ignore':
+    if input.portfolio_mode == "ignore":
         portfolio_mode = 0
 
     account_mode = 1
 
-    if input.account_mode == 'ignore':
+    if input.account_mode == "ignore":
         account_mode = 0
 
     strategy1_mode = 1
 
-    if input.strategy1_mode == 'ignore':
+    if input.strategy1_mode == "ignore":
         strategy1_mode = 0
 
     strategy2_mode = 1
 
-    if input.strategy2_mode == 'ignore':
+    if input.strategy2_mode == "ignore":
         strategy2_mode = 0
 
     strategy3_mode = 1
 
-    if input.strategy3_mode == 'ignore':
+    if input.strategy3_mode == "ignore":
         strategy3_mode = 0
 
     report = ReportModel(
         master_user=user.master_user,
         member=user.member,
-
         calculate_pl=input.calculate_pl,
         cost_method=cost_method,
         custom_fields_to_calculate=input.custom_fields_to_calculate,
         calculation_group=input.calculation_group,
-
         report_date=input.report_date,
         pricing_policy=pricing_policy,
         report_currency=report_currency,
-
         portfolio_mode=portfolio_mode,
         account_mode=account_mode,
         strategy1_mode=strategy1_mode,
         strategy2_mode=strategy2_mode,
         strategy3_mode=strategy3_mode,
-
         portfolios=portfolios,
         accounts=accounts,
         strategies1=strategies1,
         strategies2=strategies2,
         strategies3=strategies3,
-
     )
 
     builder = BalanceReportBuilderSql(report)
@@ -465,6 +466,7 @@ def balance_report(
 
 
 # PL REPORT STARTS
+
 
 @strawberry.input
 class PLReportInput:
@@ -590,41 +592,41 @@ class PLReport:
 
 @strawberry.field
 def pl_report(
-        self,
-        info,
-        input: PLReportInput,
-        limit: int = 50,
-        offset: int = 0,
+    self,
+    info,
+    input: PLReportInput,
+    limit: int = 50,
+    offset: int = 0,
 ) -> PLReport:
     user = info.context.request.user
 
     report_currency = CurrencyModel.objects.get(user_code=input.report_currency)
     pricing_policy = PricingPolicyModel.objects.get(user_code=input.pricing_policy)
 
+    portfolios = []
+
     if input.portfolios:
         portfolios = PortfolioModel.objects.filter(user_code__in=input.portfolios)
-    else:
-        portfolios = []
+
+    accounts = []
 
     if input.accounts:
         accounts = AccountModel.objects.filter(user_code__in=input.accounts)
-    else:
-        accounts = []
+
+    strategies1 = []
 
     if input.strategies1:
         strategies1 = Strategy1Model.objects.filter(user_code__in=input.strategies1)
-    else:
-        strategies1 = []
+
+    strategies2 = []
 
     if input.strategies2:
         strategies2 = Strategy2Model.objects.filter(user_code__in=input.strategies2)
-    else:
-        strategies2 = []
+
+    strategies3 = []
 
     if input.strategies3:
         strategies3 = Strategy3Model.objects.filter(user_code__in=input.strategies3)
-    else:
-        strategies3 = []
 
     cost_method = CostMethodModel.objects.get(user_code="avco")
 
@@ -633,50 +635,46 @@ def pl_report(
 
     portfolio_mode = 1
 
-    if input.portfolio_mode == 'ignore':
+    if input.portfolio_mode == "ignore":
         portfolio_mode = 0
 
     account_mode = 1
 
-    if input.account_mode == 'ignore':
+    if input.account_mode == "ignore":
         account_mode = 0
 
     strategy1_mode = 1
 
-    if input.strategy1_mode == 'ignore':
+    if input.strategy1_mode == "ignore":
         strategy1_mode = 0
 
     strategy2_mode = 1
 
-    if input.strategy2_mode == 'ignore':
+    if input.strategy2_mode == "ignore":
         strategy2_mode = 0
 
     strategy3_mode = 1
 
-    if input.strategy3_mode == 'ignore':
+    if input.strategy3_mode == "ignore":
         strategy3_mode = 0
 
     report = ReportModel(
         master_user=user.master_user,
         member=user.member,
-
         calculate_pl=input.calculate_pl,
         cost_method=cost_method,
         custom_fields_to_calculate=input.custom_fields_to_calculate,
         calculation_group=input.calculation_group,
-
         report_date=input.report_date,
         pl_first_date=input.pl_first_date,
         period_type=input.period_type,
         pricing_policy=pricing_policy,
         report_currency=report_currency,
-
         portfolio_mode=portfolio_mode,
         account_mode=account_mode,
         strategy1_mode=strategy1_mode,
         strategy2_mode=strategy2_mode,
         strategy3_mode=strategy3_mode,
-
         portfolios=portfolios,
         accounts=accounts,
         strategies1=strategies1,
@@ -732,11 +730,11 @@ class PerformanceReport:
 
 @strawberry.field
 def performance_report(
-        self,
-        info,
-        input: PerformanceReportInput,
-        limit: int = 50,
-        offset: int = 0,
+    self,
+    info,
+    input: PerformanceReportInput,
+    limit: int = 50,
+    offset: int = 0,
 ) -> PerformanceReport:
     user = info.context.request.user
 
@@ -748,13 +746,10 @@ def performance_report(
     except PortfolioBundleModel.DoesNotExist:
         bundle = None
 
-    _l.info('registers %s' % registers)
-
     if not len(registers) and not bundle:
         raise Exception("registers or bundle are not provided")
 
     if bundle:
-
         instance = PerformanceReportModel(
             master_user=user.master_user,
             member=user.member,
@@ -766,7 +761,6 @@ def performance_report(
             bundle=bundle,
         )
     elif len(registers):
-
         instance = PerformanceReportModel(
             master_user=user.master_user,
             member=user.member,
@@ -800,6 +794,7 @@ def performance_report(
 
 
 #  TRANSACTION REPORT STARTS
+
 
 @strawberry.input
 class TransactionReportInput:
@@ -894,11 +889,11 @@ class TransactionReport:
 
 @strawberry.field
 def transaction_report(
-        self,
-        info,
-        input: TransactionReportInput,
-        limit: int = 50,
-        offset: int = 0,
+    self,
+    info,
+    input: TransactionReportInput,
+    limit: int = 50,
+    offset: int = 0,
 ) -> TransactionReport:
     user = info.context.request.user
 
@@ -930,20 +925,16 @@ def transaction_report(
     report = TransactionReportModel(
         master_user=user.master_user,
         member=user.member,
-
         custom_fields_to_calculate=input.custom_fields_to_calculate,
-
         begin_date=input.begin_date,
         end_date=input.end_date,
         date_field=input.date_field,
         depth_level=input.depth_level,
-
         portfolios=portfolios,
         accounts=accounts,
         strategies1=strategies1,
         strategies2=strategies2,
         strategies3=strategies3,
-
     )
 
     builder = TransactionReportBuilderSql(instance=report)
