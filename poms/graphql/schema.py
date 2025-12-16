@@ -41,10 +41,11 @@ from poms.portfolios.models import Portfolio as PortfolioModel
 from poms.portfolios.models import PortfolioHistory as PortfolioHistoryModel
 from poms.portfolios.models import PortfolioRegister as PortfolioRegisterModel
 from poms.portfolios.models import PortfolioBundle as PortfolioBundleModel
-from poms.reports.common import Report
-from poms.reports.serializers_helpers import serialize_balance_report_item
+from poms.reports.common import Report as ReportModel
+from poms.reports.serializers_helpers import serialize_balance_report_item, serialize_pl_report_item
 from poms.reports.sql_builders.balance import BalanceReportBuilderSql
 from poms.reports.common import PerformanceReport as PerformanceReportModel
+from poms.reports.sql_builders.pl import PLReportBuilderSql
 from poms.strategies.models import Strategy1 as Strategy1Model
 from poms.strategies.models import Strategy2 as Strategy2Model
 from poms.strategies.models import Strategy3 as Strategy3Model
@@ -409,7 +410,7 @@ def balance_report(
     if input.strategy3_mode == 'ignore':
         strategy3_mode = 0
 
-    report = Report(
+    report = ReportModel(
         master_user=user.master_user,
         member=user.member,
 
@@ -456,11 +457,30 @@ def balance_report(
 
 @strawberry.input
 class PLReportInput:
-    pl_first_date: date
+
+    pl_first_date: date | None = None
     report_date: date
-    report_currency: str | None = None
-    portfolios: list[str] | None = None
+    report_currency: str = "USD"
+    period_type: str | None = None # daily, mtd, qtd, ytd, inception
+
     pricing_policy: str | None = None
+    calculate_pl: bool = False
+    cost_method: str = "avco" # avco or fifo
+    expression_iterations_count: int = 1
+    custom_fields_to_calculate: str = ""
+    calculation_group: str = "portfolio.id"
+
+    portfolios: list[str] | None = None
+    accounts: list[str] | None = None
+    strategies1: list[str] | None = None
+    strategies2: list[str] | None = None
+    strategies3: list[str] | None = None
+
+    portfolio_mode: str = "independent"
+    account_mode: str = "independent"
+    strategy1_mode: str = "independent"
+    strategy2_mode: str = "independent"
+    strategy3_mode: str = "independent"
 
 
 @strawberry.type
@@ -472,79 +492,85 @@ class PLReportItem:
     portfolio: int
     item_type: int
     item_type_name: str
-    instrument: int | None
-    currency: int | None
-    pricing_currency: int | None
-    exposure_currency: int | None
-    allocation: int | None
-    instrument_pricing_currency_fx_rate: float
-    instrument_accrued_currency_fx_rate: float
-    instrument_principal_price: float
-    instrument_accrued_price: float
-    instrument_factor: float
-    instrument_ytm: float
-    daily_price_change: float
-    account: int | None
-    strategy1: int | None
-    strategy2: int | None
-    strategy3: int | None
-    fx_rate: float
-    position_size: float
-    nominal_position_size: float
-    market_value: float | None
-    market_value_loc: float | None
-    exposure: float | None
-    exposure_loc: float | None
-    ytm: float
-    ytm_at_cost: float
-    modified_duration: float
-    return_annually: float
-    return_annually_fixed: float
-    position_return: float
-    position_return_loc: float
-    net_position_return: float
-    net_position_return_loc: float
-    position_return_fixed: float
-    position_return_fixed_loc: float
-    net_position_return_fixed: float
-    net_position_return_fixed_loc: float
-    net_cost_price: float
-    net_cost_price_loc: float
-    gross_cost_price: float
-    gross_cost_price_loc: float
-    principal_invested: float
-    principal_invested_loc: float
-    amount_invested: float
-    amount_invested_loc: float
-    principal_invested_fixed: float
-    principal_invested_fixed_loc: float
-    amount_invested_fixed: float
-    amount_invested_fixed_loc: float
-    time_invested: float
-    principal: float
-    carry: float
-    overheads: float
-    total: float
-    principal_fx: float
-    carry_fx: float
-    overheads_fx: float
-    total_fx: float
-    principal_fixed: float
-    carry_fixed: float
-    overheads_fixed: float
-    total_fixed: float
-    principal_loc: float
-    carry_loc: float
-    overheads_loc: float
-    total_loc: float
-    principal_fx_loc: float
-    carry_fx_loc: float
-    overheads_fx_loc: float
-    total_fx_loc: float
-    principal_fixed_loc: float
-    carry_fixed_loc: float
-    overheads_fixed_loc: float
-    total_fixed_loc: float
+    item_group: str | None = None
+    item_group_code: str | None = None
+    item_group_name: str | None = None
+    instrument: int | None = None
+    currency: int | None = None
+    pricing_currency: int | None = None
+    exposure_currency: int | None = None
+    allocation: int | None = None
+    instrument_pricing_currency_fx_rate: float | None = None
+    instrument_accrued_currency_fx_rate: float | None = None
+    instrument_principal_price: float | None = None
+    instrument_accrued_price: float | None = None
+    instrument_factor: float | None = None
+    instrument_ytm: float | None = None
+    daily_price_change: float | None = None
+    account: int | None = None
+    strategy1: int | None = None
+    strategy2: int | None = None
+    strategy3: int | None = None
+    fx_rate: float | None = None
+    position_size: float | None = None
+    period_start_position_size: float | None = None
+    period_start_nominal_position_size: float | None = None
+    mismatch: float | None = None
+    nominal_position_size: float | None = None
+    market_value: float | None = None
+    market_value_loc: float | None = None
+    exposure: float | None = None
+    exposure_loc: float | None = None
+    ytm: float | None = None
+    ytm_at_cost: float | None = None
+    modified_duration: float | None = None
+    return_annually: float | None = None
+    return_annually_fixed: float | None = None
+    position_return: float | None = None
+    position_return_loc: float | None = None
+    net_position_return: float | None = None
+    net_position_return_loc: float | None = None
+    position_return_fixed: float | None = None
+    position_return_fixed_loc: float | None = None
+    net_position_return_fixed: float | None = None
+    net_position_return_fixed_loc: float | None = None
+    net_cost_price: float | None = None
+    net_cost_price_loc: float | None = None
+    gross_cost_price: float | None = None
+    gross_cost_price_loc: float | None = None
+    principal_invested: float | None = None
+    principal_invested_loc: float | None = None
+    amount_invested: float | None = None
+    amount_invested_loc: float | None = None
+    principal_invested_fixed: float | None = None
+    principal_invested_fixed_loc: float | None = None
+    amount_invested_fixed: float | None = None
+    amount_invested_fixed_loc: float | None = None
+    time_invested: float | None = None
+    principal: float | None = None
+    carry: float | None = None
+    overheads: float | None = None
+    total: float | None = None
+    principal_fx: float | None = None
+    carry_fx: float | None = None
+    overheads_fx: float | None = None
+    total_fx: float | None = None
+    principal_fixed: float | None = None
+    carry_fixed: float | None = None
+    overheads_fixed: float | None = None
+    total_fixed: float | None = None
+    principal_loc: float | None = None
+    carry_loc: float | None = None
+    overheads_loc: float | None = None
+    total_loc: float | None = None
+    principal_fx_loc: float | None = None
+    carry_fx_loc: float | None = None
+    overheads_fx_loc: float | None = None
+    total_fx_loc: float | None = None
+    principal_fixed_loc: float | None = None
+    carry_fixed_loc: float | None = None
+    overheads_fixed_loc: float | None = None
+    total_fixed_loc: float | None = None
 
 
 @strawberry.type
@@ -564,25 +590,99 @@ def pl_report(
 
     report_currency = CurrencyModel.objects.get(user_code=input.report_currency)
     pricing_policy = PricingPolicyModel.objects.get(user_code=input.pricing_policy)
-    portfolios = PortfolioModel.objects.filter(user_code__in=input.portfolios)
 
-    report = Report(
+    if input.portfolios:
+        portfolios = PortfolioModel.objects.filter(user_code__in=input.portfolios)
+    else:
+        portfolios = []
+
+    if input.accounts:
+        accounts = AccountModel.objects.filter(user_code__in=input.accounts)
+    else:
+        accounts = []
+
+    if input.strategies1:
+        strategies1 = Strategy1Model.objects.filter(user_code__in=input.strategies1)
+    else:
+        strategies1 = []
+
+    if input.strategies2:
+        strategies2 = Strategy2Model.objects.filter(user_code__in=input.strategies2)
+    else:
+        strategies2 = []
+
+    if input.strategies3:
+        strategies3 = Strategy3Model.objects.filter(user_code__in=input.strategies3)
+    else:
+        strategies3 = []
+
+    cost_method = CostMethodModel.objects.get(user_code="avco")
+
+    if input.cost_method == "fifo":
+        cost_method = CostMethodModel.objects.get(user_code="fifo")
+
+    portfolio_mode = 1
+
+    if input.portfolio_mode == 'ignore':
+        portfolio_mode = 0
+
+
+    account_mode = 1
+
+    if input.account_mode == 'ignore':
+        account_mode = 0
+
+    strategy1_mode = 1
+
+    if input.strategy1_mode == 'ignore':
+        strategy1_mode = 0
+
+    strategy2_mode = 1
+
+    if input.strategy2_mode == 'ignore':
+        strategy2_mode = 0
+
+
+    strategy3_mode = 1
+
+    if input.strategy3_mode == 'ignore':
+        strategy3_mode = 0
+
+    report = ReportModel(
         master_user=user.master_user,
         member=user.member,
-        pl_first_date=input.pl_first_date,
+
+        calculate_pl=input.calculate_pl,
+        cost_method=cost_method,
+        custom_fields_to_calculate=input.custom_fields_to_calculate,
+        calculation_group=input.calculation_group,
+
         report_date=input.report_date,
+        pl_first_date=input.pl_first_date,
+        period_type=input.period_type,
         pricing_policy=pricing_policy,
-        portfolios=portfolios,
         report_currency=report_currency,
+
+        portfolio_mode=portfolio_mode,
+        account_mode=account_mode,
+        strategy1_mode=strategy1_mode,
+        strategy2_mode=strategy2_mode,
+        strategy3_mode=strategy3_mode,
+
+        portfolios=portfolios,
+        accounts=accounts,
+        strategies1=strategies1,
+        strategies2=strategies2,
+        strategies3=strategies3,
     )
 
-    builder = BalanceReportBuilderSql(report)
-    report = builder.build_balance_sync()
+    builder = PLReportBuilderSql(report)
+    report = builder.build_pl_sync()
 
     items = []
 
     for item in report.items:
-        items.append(serialize_balance_report_item(item)) # TODO change to PL report serializer
+        items.append(serialize_pl_report_item(item))
 
     # _l.info('report.items %s' % items[0])
 
