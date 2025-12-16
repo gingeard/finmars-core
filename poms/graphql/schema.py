@@ -28,7 +28,7 @@ from poms.graphql.filters import (
     Strategy1Filter,
     Strategy2Filter,
     Strategy3Filter,
-    TransactionFilter,
+    TransactionFilter, PricingPolicyFilter, PortfolioHistoryFilter,
 )
 from poms.instruments.models import Country as CountryModel
 from poms.instruments.models import Instrument as InstrumentModel
@@ -36,6 +36,7 @@ from poms.instruments.models import InstrumentType as InstrumentTypeModel
 from poms.instruments.models import PriceHistory as PriceHistoryModel
 from poms.instruments.models import PricingPolicy as PricingPolicyModel
 from poms.portfolios.models import Portfolio as PortfolioModel
+from poms.portfolios.models import PortfolioHistory as PortfolioHistoryModel
 from poms.reports.common import Report
 from poms.reports.serializers_helpers import serialize_balance_report_item
 from poms.reports.sql_builders.balance import BalanceReportBuilderSql
@@ -122,6 +123,14 @@ class CurrencyHistory:
 @strawberry_django.type(PortfolioModel, fields="__all__")
 class Portfolio:
     owner: Member | None
+
+
+@strawberry_django.type(PortfolioHistoryModel, fields="__all__")
+class PortfolioHistory:
+    owner: Member | None
+    portfolio: Portfolio | None
+    currency: Currency | None
+    pricing_policy: PricingPolicy | None
 
 
 @strawberry_django.type(InstrumentTypeModel, fields="__all__")
@@ -308,11 +317,11 @@ class BalanceReport:
 
 @strawberry.field
 def balance_report(
-    self,
-    info,
-    input: BalanceReportInput,
-    limit: int = 50,
-    offset: int = 0,
+        self,
+        info,
+        input: BalanceReportInput,
+        limit: int = 50,
+        offset: int = 0,
 ) -> BalanceReport:
     user = info.context.request.user
 
@@ -371,6 +380,11 @@ class Query:
         pagination=True,
     )
 
+    portfolio_history: list[PortfolioHistory] = strawberry_django.field(
+        filters=PortfolioHistoryFilter,
+        pagination=True,
+    )
+
     instrument_type: list[InstrumentType] = strawberry_django.field(
         filters=InstrumentTypeFilter,
         pagination=True,
@@ -378,6 +392,11 @@ class Query:
 
     instrument: list[Instrument] = strawberry_django.field(
         filters=InstrumentFilter,
+        pagination=True,
+    )
+
+    pricing_policy: list[PricingPolicy] = strawberry_django.field(
+        filters=PricingPolicyFilter,
         pagination=True,
     )
 
