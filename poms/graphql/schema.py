@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 from datetime import date
+from typing import Type, TypeVar, Any
 
 import strawberry
 import strawberry_django
 from strawberry.schema.config import StrawberryConfig
-from dataclasses import field
 
 from poms.accounts.models import Account as AccountModel
 from poms.accounts.models import AccountType as AccountTypeModel
@@ -31,21 +32,24 @@ from poms.graphql.filters import (
     Strategy3Filter,
     TransactionFilter, PricingPolicyFilter, PortfolioHistoryFilter,
 )
+from poms.instruments.models import CostMethod as CostMethodModel
 from poms.instruments.models import Country as CountryModel
 from poms.instruments.models import Instrument as InstrumentModel
 from poms.instruments.models import InstrumentType as InstrumentTypeModel
 from poms.instruments.models import PriceHistory as PriceHistoryModel
 from poms.instruments.models import PricingPolicy as PricingPolicyModel
-from poms.instruments.models import CostMethod as CostMethodModel
 from poms.portfolios.models import Portfolio as PortfolioModel
+from poms.portfolios.models import PortfolioBundle as PortfolioBundleModel
 from poms.portfolios.models import PortfolioHistory as PortfolioHistoryModel
 from poms.portfolios.models import PortfolioRegister as PortfolioRegisterModel
-from poms.portfolios.models import PortfolioBundle as PortfolioBundleModel
-from poms.reports.common import Report as ReportModel
-from poms.reports.serializers_helpers import serialize_balance_report_item, serialize_pl_report_item
-from poms.reports.sql_builders.balance import BalanceReportBuilderSql
 from poms.reports.common import PerformanceReport as PerformanceReportModel
+from poms.reports.common import Report as ReportModel
+from poms.reports.common import TransactionReport as TransactionReportModel
+from poms.reports.serializers_helpers import serialize_balance_report_item, serialize_pl_report_item, \
+    serialize_transaction_report_item
+from poms.reports.sql_builders.balance import BalanceReportBuilderSql
 from poms.reports.sql_builders.pl import PLReportBuilderSql
+from poms.reports.sql_builders.transaction import TransactionReportBuilderSql
 from poms.strategies.models import Strategy1 as Strategy1Model
 from poms.strategies.models import Strategy2 as Strategy2Model
 from poms.strategies.models import Strategy3 as Strategy3Model
@@ -55,6 +59,8 @@ from poms.transactions.models import TransactionClass as TransactionClassModel
 from poms.users.models import Member as MemberModel
 
 _l = logging.getLogger("poms.graphql")
+
+T = TypeVar("T")
 
 # Put here fields you NEVER want to expose (internal/state/provenance/etc)
 COMMON_EXCLUDE = [
@@ -73,6 +79,13 @@ def gql_type(model):
         exclude=COMMON_EXCLUDE,
         pagination=True,  # makes list relations accept pagination args
     )
+
+
+def from_dict(cls: Type[T], data: dict[str, Any]) -> T:
+    # keeps only fields declared in the strawberry/dataclass type
+    allowed = {f.name for f in dataclasses.fields(cls)}
+    filtered = {k: v for k, v in data.items() if k in allowed}
+    return cls(**filtered)
 
 
 # --- Types (minimal, no duplication) ---
@@ -233,7 +246,7 @@ class BalanceReportInput:
 
     pricing_policy: str | None = None
     calculate_pl: bool = False
-    cost_method: str = "avco" # avco or fifo
+    cost_method: str = "avco"  # avco or fifo
     expression_iterations_count: int = 1
     custom_fields_to_calculate: str = ""
     calculation_group: str = "portfolio.id"
@@ -388,7 +401,6 @@ def balance_report(
     if input.portfolio_mode == 'ignore':
         portfolio_mode = 0
 
-
     account_mode = 1
 
     if input.account_mode == 'ignore':
@@ -403,7 +415,6 @@ def balance_report(
 
     if input.strategy2_mode == 'ignore':
         strategy2_mode = 0
-
 
     strategy3_mode = 1
 
@@ -457,15 +468,14 @@ def balance_report(
 
 @strawberry.input
 class PLReportInput:
-
     pl_first_date: date | None = None
     report_date: date
     report_currency: str = "USD"
-    period_type: str | None = None # daily, mtd, qtd, ytd, inception
+    period_type: str | None = None  # daily, mtd, qtd, ytd, inception
 
     pricing_policy: str | None = None
     calculate_pl: bool = False
-    cost_method: str = "avco" # avco or fifo
+    cost_method: str = "avco"  # avco or fifo
     expression_iterations_count: int = 1
     custom_fields_to_calculate: str = ""
     calculation_group: str = "portfolio.id"
@@ -626,7 +636,6 @@ def pl_report(
     if input.portfolio_mode == 'ignore':
         portfolio_mode = 0
 
-
     account_mode = 1
 
     if input.account_mode == 'ignore':
@@ -641,7 +650,6 @@ def pl_report(
 
     if input.strategy2_mode == 'ignore':
         strategy2_mode = 0
-
 
     strategy3_mode = 1
 
@@ -695,19 +703,18 @@ def pl_report(
 #  PERFORMANCE REPORT STARTS
 
 
-
 @strawberry.input
 class PerformanceReportInput:
     save_report: bool = False
-    adjustment_type: str = "original" # "original", "annualized"
+    adjustment_type: str = "original"  # "original", "annualized"
     begin_date: date | None = None
     end_date: date
     calculation_type: str = "modified_dietz"
-    segmentation_type: str = "months" # "months", "days"
-    period_type: str = "inception" # "daily", "mtd", "ytd", "inception"
+    segmentation_type: str = "months"  # "months", "days"
+    period_type: str = "inception"  # "daily", "mtd", "ytd", "inception"
     report_currency: str = "USD"
-    bundle: str | None = None # user_code of bundle
-    registers: list[str] = None # list user_codes of portfolio registers
+    bundle: str | None = None  # user_code of bundle
+    registers: list[str] = None  # list user_codes of portfolio registers
 
 
 @strawberry.type
@@ -720,7 +727,7 @@ class PerformanceReport:
     grand_cash_inflow: float
     grand_cash_outflow: float
     grand_nav: float
-    grand_return: float # Main field for performance_report
+    grand_return: float  # Main field for performance_report
 
 
 @strawberry.field
@@ -771,12 +778,10 @@ def performance_report(
             registers=registers,
         )
 
-
     from poms.reports.performance_report import PerformanceReportBuilder
 
     builder = PerformanceReportBuilder(instance=instance)
     instance = builder.build_report()
-
 
     # _l.info('report.items %s' % items[0])
 
@@ -793,6 +798,168 @@ def performance_report(
         grand_return=instance.grand_return,
     )
 
+
+#  TRANSACTION REPORT STARTS
+
+@strawberry.input
+class TransactionReportInput:
+    begin_date: date
+    end_date: date
+    depth_level: str = "entry"
+    date_field: str = "transaction_date"
+
+    expression_iterations_count: int = 1
+    custom_fields_to_calculate: str = ""
+
+    portfolios: list[str] | None = None
+    accounts: list[str] | None = None
+    strategies1: list[str] | None = None
+    strategies2: list[str] | None = None
+    strategies3: list[str] | None = None
+
+
+@strawberry.type
+class TransactionReportItem:
+    id: str
+    is_locked: bool | None = None
+    is_canceled: bool | None = None
+    notes: str | None = None
+    transaction_code: int | None = None
+    transaction_class: int | None = None
+    complex_transaction: int | None = None
+    portfolio: int | None = None
+    counterparty: int | None = None
+    responsible: int | None = None
+    settlement_currency: int | None = None
+    transaction_currency: int | None = None
+    account_cash: int | None = None
+    account_interim: int | None = None
+    account_position: int | None = None
+    allocation_balance: int | None = None
+    allocation_pl: int | None = None
+    instrument: int | None = None
+    linked_instrument: int | None = None
+    cash_consideration: float | None = None
+    carry_amount: float | None = None
+    carry_with_sign: float | None = None
+    overheads_with_sign: float | None = None
+    factor: float | None = None
+    position_amount: float | None = None
+    position_size_with_sign: float | None = None
+    principal_amount: float | None = None
+    principal_with_sign: float | None = None
+    reference_fx_rate: float | None = None
+    trade_price: float | None = None
+    cash_date: date | None = None
+    accounting_date: date | None = None
+    transaction_date: date | None = None
+    strategy1_cash: int | None = None
+    strategy1_position: int | None = None
+    strategy2_cash: int | None = None
+    strategy2_position: int | None = None
+    strategy3_cash: int | None = None
+    strategy3_position: int | None = None
+    transaction_item_name: str | None = None
+    transaction_item_short_name: str | None = None
+    transaction_item_user_code: str | None = None
+    entry_account: str | None = None
+    entry_strategy: str | None = None
+    entry_item_short_name: str | None = None
+    entry_item_user_code: str | None = None
+    entry_item_name: str | None = None
+    entry_item_public_name: str | None = None
+    entry_currency: str | None = None
+    entry_instrument: str | None = None
+    entry_amount: float | None = None
+    entry_item_type: float | None = None
+    entry_item_type_name: float | None = None
+
+    user_text_1: str | None = None
+    user_text_2: str | None = None
+    user_text_3: str | None = None
+
+    user_number_1: str | None = None
+    user_number_2: str | None = None
+    user_number_3: str | None = None
+
+    user_date_1: date | None = None
+    user_date_2: date | None = None
+    user_date_3: date | None = None
+
+
+@strawberry.type
+class TransactionReport:
+    items: list[TransactionReportItem]
+
+
+@strawberry.field
+def transaction_report(
+        self,
+        info,
+        input: TransactionReportInput,
+        limit: int = 50,
+        offset: int = 0,
+) -> TransactionReport:
+    user = info.context.request.user
+
+    if input.portfolios:
+        portfolios = PortfolioModel.objects.filter(user_code__in=input.portfolios)
+    else:
+        portfolios = []
+
+    if input.accounts:
+        accounts = AccountModel.objects.filter(user_code__in=input.accounts)
+    else:
+        accounts = []
+
+    if input.strategies1:
+        strategies1 = Strategy1Model.objects.filter(user_code__in=input.strategies1)
+    else:
+        strategies1 = []
+
+    if input.strategies2:
+        strategies2 = Strategy2Model.objects.filter(user_code__in=input.strategies2)
+    else:
+        strategies2 = []
+
+    if input.strategies3:
+        strategies3 = Strategy3Model.objects.filter(user_code__in=input.strategies3)
+    else:
+        strategies3 = []
+
+    report = TransactionReportModel(
+        master_user=user.master_user,
+        member=user.member,
+
+        custom_fields_to_calculate=input.custom_fields_to_calculate,
+
+        begin_date=input.begin_date,
+        end_date=input.end_date,
+        date_field=input.date_field,
+        depth_level=input.depth_level,
+
+        portfolios=portfolios,
+        accounts=accounts,
+        strategies1=strategies1,
+        strategies2=strategies2,
+        strategies3=strategies3,
+
+    )
+
+    builder = TransactionReportBuilderSql(instance=report)
+    instance = builder.build_transaction()
+
+    items = []
+
+    for item in instance.items:
+        items.append(serialize_transaction_report_item(item))
+
+    # _l.info('report.items %s' % items[0])
+
+    # 3) map result to GraphQL types
+    return TransactionReport(
+        items=[from_dict(TransactionReportItem, row) for row in items],
+    )
 
 
 @strawberry.type
@@ -884,6 +1051,7 @@ class Query:
     balance_report: BalanceReport = balance_report
     pl_report: PLReport = pl_report
     performance_report: PerformanceReport = performance_report
+    transaction_report: TransactionReport = transaction_report
 
 
 schema = strawberry.Schema(
