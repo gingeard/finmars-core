@@ -133,6 +133,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "django_celery_beat",
     "finmars_standardized_errors",
+    "strawberry.django",
     # ==================================
     # = IMPORTANT LOGIC ON APP STARTUP =
     # ==================================
