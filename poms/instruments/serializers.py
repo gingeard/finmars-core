@@ -18,9 +18,9 @@ from poms.common.serializers import (
     PomsClassSerializer,
 )
 from poms.common.utils import date_now
-from poms.currencies.fields import CurrencyDefault
+from poms.currencies.fields import CurrencyDefault, CurrencyField
 from poms.currencies.models import CurrencyPricingPolicy
-from poms.currencies.serializers import CurrencyEvalSerializer, CurrencyField
+from poms.currencies.serializers.common import CurrencyEvalSerializer
 from poms.iam.serializers import ModelWithResourceGroupSerializer
 from poms.instruments.fields import (
     AUTO_CALCULATE,

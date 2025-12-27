@@ -5301,7 +5301,7 @@ class TransactionEvalSerializer(serializers.ModelSerializer):
             CounterpartyEvalSerializer,
             ResponsibleEvalSerializer,
         )
-        from poms.currencies.serializers import CurrencyEvalSerializer
+        from poms.currencies.serializers.common import CurrencyEvalSerializer
         from poms.instruments.serializers import InstrumentEvalSerializer
         from poms.portfolios.serializers import PortfolioEvalSerializer
         from poms.strategies.serializers import (
