@@ -769,7 +769,8 @@ def _get_supported_models_serializer_class():
         ResponsibleEvalSerializer,
     )
     from poms.currencies.models import Currency, CurrencyHistory
-    from poms.currencies.serializers import CurrencyEvalSerializer, CurrencyHistorySerializer
+    from poms.currencies.serializers import CurrencyHistorySerializer
+    from poms.currencies.serializers.common import CurrencyEvalSerializer
     from poms.instruments.models import (
         AccrualCalculationSchedule,
         Country,

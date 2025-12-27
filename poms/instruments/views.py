@@ -100,6 +100,7 @@ from poms.instruments.serializers import (
     PaymentSizeDetailSerializer,
     PeriodicitySerializer,
     PriceHistoryCalculateSerializer,
+    PriceHistoryLightSerializer,
     PriceHistoryRecalculateSerializer,
     PriceHistorySerializer,
     PricingConditionSerializer,
@@ -1627,6 +1628,19 @@ class PriceHistoryViewSet(AbstractModelViewSet):
             # return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="light",
+        serializer_class=PriceHistoryLightSerializer,
+    )
+    def list_light(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginator.post_paginate_queryset(queryset, request)
+        serializer = self.get_serializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=["get"], url_path="attributes")
     def list_attributes(self, request, *args, **kwargs):

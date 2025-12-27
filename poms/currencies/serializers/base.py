@@ -12,6 +12,7 @@ from poms.common.serializers import (
 from poms.currencies.fields import CurrencyField
 from poms.currencies.models import Currency, CurrencyHistory, CurrencyPricingPolicy
 from poms.instruments.fields import PricingPolicyField
+from poms.instruments.serializers import PricingPolicyUserCodeOnlySerializer
 from poms.obj_attrs.serializers import ModelWithAttributesSerializer
 from poms.pricing.models import CurrencyHistoryError
 from poms.provenance.serializers import ModelWithProvenanceSerializer
@@ -143,6 +144,12 @@ class CurrencyViewSerializer(ModelWithUserCodeSerializer):
         ]
 
 
+class CurrencyUserCodeOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = ["user_code"]
+
+
 class CurrencyHistorySerializer(
     ModelMetaSerializer, ModelWithTimeStampSerializer, ModelWithObjectStateSerializer, ModelWithProvenanceSerializer
 ):
@@ -252,6 +259,28 @@ class CurrencyHistorySerializer(
         )
 
         return instance
+
+
+class CurrencyHistoryLightSerializer(ModelMetaSerializer):
+    currency_object = CurrencyUserCodeOnlySerializer(source="currency")
+    pricing_policy_object = PricingPolicyUserCodeOnlySerializer(source="pricing_policy")
+    fx_rate = FloatEvalField()
+    procedure_modified_datetime = ReadOnlyField()
+
+    class Meta:
+        model = CurrencyHistory
+        fields = [
+            "id",
+            "currency_object",
+            "pricing_policy_object",
+            "date",
+            "fx_rate",
+            "procedure_modified_datetime",
+            "modified_at",
+            "is_temporary_fx_rate",
+        ]
+
+        read_only_fields = fields
 
 
 class CurrencyEvalSerializer(ModelWithUserCodeSerializer, ModelWithTimeStampSerializer):
