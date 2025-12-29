@@ -5,9 +5,11 @@ from poms.common.fields import UserCodeField
 from poms.common.serializers import (
     ModelMetaSerializer,
     ModelOwnerSerializer,
+    ModelWithObjectStateSerializer,
     ModelWithUserCodeSerializer,
 )
 from poms.portfolios.models import Portfolio
+from poms.provenance.serializers import ModelWithProvenanceSerializer
 from poms.system_messages.handlers import send_system_message
 from poms.users.fields import MasterUserField
 from poms.users.utils import (
@@ -16,7 +18,7 @@ from poms.users.utils import (
 )
 
 
-class ClientSerializer(ModelWithUserCodeSerializer):
+class ClientSerializer(ModelWithUserCodeSerializer, ModelWithObjectStateSerializer, ModelWithProvenanceSerializer):
     master_user = MasterUserField()
 
     portfolios = serializers.PrimaryKeyRelatedField(queryset=Portfolio.objects.all(), many=True, required=False)

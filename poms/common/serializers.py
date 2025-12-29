@@ -198,9 +198,10 @@ class ModelWithObjectStateSerializer(serializers.ModelSerializer):
         self.fields["origin_manual_entry_point"] = serializers.CharField(allow_null=True, required=False)
 
         self.fields["credential_user_code"] = serializers.CharField(allow_null=True, required=False)
-        self.fields["credential_version_integer"] = serializers.CharField(allow_null=True, required=False)
+        # self.fields["credential_version_integer"] = serializers.CharField(allow_null=True, required=False)
 
         self.fields["origin_initiator_code"] = serializers.CharField(allow_null=True, required=False)
+        self.fields["origin_initiator_third_party_push_code"] = serializers.CharField(allow_null=True, required=False)
         self.fields["workflow_module_user_code"] = serializers.CharField(allow_null=True, required=False)
         self.fields["workflow_module_version_semantic"] = serializers.CharField(allow_null=True, required=False)
         self.fields["workflow_id"] = serializers.CharField(allow_null=True, required=False)

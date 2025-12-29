@@ -8,9 +8,10 @@ from django.utils.translation import gettext_lazy
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
 
-from poms.common.models import AbstractClassModel, NamedModel, TimeStampedModel
+from poms.common.models import AbstractClassModel, NamedModel, ObjectStateModel, TimeStampedModel
 from poms.configuration.models import ConfigurationModel
 from poms.configuration_sharing.models import SharedConfigurationFile
+from poms.provenance.models import ProvenanceModel
 from poms.users.models import MasterUser, Member
 
 
@@ -905,7 +906,7 @@ class ListLayout(BaseLayout, TimeStampedModel):
         return self.name
 
 
-class DashboardLayout(BaseUIModel, TimeStampedModel):
+class DashboardLayout(BaseUIModel, TimeStampedModel, ObjectStateModel, ProvenanceModel):
     member = models.ForeignKey(
         Member,
         related_name="dashboard_layouts",

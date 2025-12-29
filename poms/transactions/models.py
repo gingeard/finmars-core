@@ -18,6 +18,7 @@ from poms.common.models import (
     AbstractClassModel,
     FakeDeletableModel,
     NamedModel,
+    ObjectStateModel,
     TimeStampedModel,
 )
 from poms.common.utils import date_now
@@ -421,10 +422,7 @@ class TransactionTypeGroup(NamedModel, FakeDeletableModel, ConfigurationModel, T
 
 
 class TransactionType(
-    NamedModel,
-    FakeDeletableModel,
-    TimeStampedModel,
-    ConfigurationModel,
+    NamedModel, FakeDeletableModel, TimeStampedModel, ConfigurationModel, ObjectStateModel, ProvenanceModel
 ):
     SHOW_PARAMETERS = 1
     HIDE_PARAMETERS = 2
@@ -2392,7 +2390,7 @@ class EventToHandle(NamedModel):
         verbose_name_plural = gettext_lazy("events to handle")
 
 
-class ComplexTransaction(TimeStampedModel, ProvenanceModel):
+class ComplexTransaction(TimeStampedModel, ObjectStateModel, ProvenanceModel):
     PRODUCTION = 1
     PENDING = 2
     IGNORE = 3
@@ -3041,7 +3039,7 @@ class ComplexTransactionInput(models.Model):
         ]
 
 
-class Transaction(ProvenanceModel):
+class Transaction(ObjectStateModel, ProvenanceModel):
     master_user = models.ForeignKey(
         MasterUser,
         related_name="transactions",

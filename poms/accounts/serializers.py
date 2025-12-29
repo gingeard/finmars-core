@@ -20,6 +20,8 @@ class AccountTypeSerializer(
     ModelWithAttributesSerializer,
     ModelWithTimeStampSerializer,
     ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
     transaction_details_expr = ExpressionField(
