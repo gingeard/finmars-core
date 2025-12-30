@@ -491,6 +491,8 @@ class InstrumentTypeSerializer(
     ModelWithAttributesSerializer,
     ModelWithTimeStampSerializer,
     ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
     instrument_class_object = InstrumentClassSerializer(
@@ -1516,7 +1518,7 @@ class AccrualCalculationScheduleStandaloneSerializer(serializers.ModelSerializer
         return attrs
 
 
-class InstrumentFactorScheduleSerializer(ModelWithObjectStateSerializer):
+class InstrumentFactorScheduleSerializer(ModelWithObjectStateSerializer, ModelWithProvenanceSerializer):
     class Meta:
         model = InstrumentFactorSchedule
         fields = ["id", "effective_date", "factor_value"]

@@ -666,6 +666,7 @@ class AbstractObjectStateFilter(FilterSet):
     origin_initiator_type = CharFilter(lookup_expr="exact")
     origin_manual_entry_point = CharFilter(lookup_expr="exact")
     origin_initiator_code = CharFilter(lookup_expr="exact")
+    origin_initiator_third_party_push_code = CharFilter(lookup_expr="exact")
 
     # reference_ids # look above
     # platform_version # look above

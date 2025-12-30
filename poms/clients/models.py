@@ -1,11 +1,12 @@
 from django.db import models
 from django.utils.translation import gettext_lazy
 
-from poms.common.models import NamedModel, OwnerModel
+from poms.common.models import NamedModel, ObjectStateModel, OwnerModel
+from poms.provenance.models import ProvenanceModel
 from poms.users.models import MasterUser
 
 
-class Client(NamedModel):
+class Client(NamedModel, ObjectStateModel, ProvenanceModel):
     master_user = models.ForeignKey(
         MasterUser,
         related_name="client",

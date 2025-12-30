@@ -5,6 +5,7 @@ from rest_framework import serializers
 from poms.common.fields import ExpressionField, name_validator
 from poms.common.models import EXPRESSION_FIELD_LENGTH
 from poms.common.serializers import (
+    ModelWithObjectStateSerializer,
     ModelWithTimeStampSerializer,
     ModelWithUserCodeSerializer,
 )
@@ -14,6 +15,7 @@ from poms.users.fields import HiddenMemberField, MasterUserField
 from ..celery_tasks.models import CeleryTask
 from ..file_reports.serializers import FileReportSerializer
 from ..obj_attrs.models import GenericAttributeType
+from ..provenance.serializers import ModelWithProvenanceSerializer
 from ..transaction_import.models import TransactionImportResult
 from .fields import CsvImportContentTypeField, CsvImportSchemeField
 from .models import (
@@ -129,7 +131,12 @@ class CsvImportSchemeCalculatedInputSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "column", "name_expr"]
 
 
-class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeSerializer):
+class CsvImportSchemeSerializer(
+    ModelWithTimeStampSerializer,
+    ModelWithUserCodeSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
+):
     master_user = MasterUserField()
     csv_fields = CsvFieldSerializer(many=True)
     entity_fields = EntityFieldSerializer(many=True)
@@ -216,6 +223,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_user_code",
                 "credential_version_integer",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -240,6 +248,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -264,6 +273,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -288,6 +298,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -315,6 +326,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -365,6 +377,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -386,6 +399,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -413,6 +427,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -442,6 +457,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -465,6 +481,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -489,6 +506,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -513,6 +531,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
@@ -537,6 +556,7 @@ class CsvImportSchemeSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
                 "credential_version_integer",
                 "platform_version",
                 "origin_initiator_code",
+                "origin_initiator_third_party_push_code",
                 "workflow_module_user_code",
                 "workflow_module_version_semantic",
                 "workflow_id",
