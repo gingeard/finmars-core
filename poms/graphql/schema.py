@@ -50,7 +50,8 @@ from poms.reports.common import TransactionReport as TransactionReportModel
 from poms.reports.serializers_helpers import (
     serialize_balance_report_item,
     serialize_pl_report_item,
-    serialize_transaction_report_item, serialize_price_checker_item,
+    serialize_price_checker_item,
+    serialize_transaction_report_item,
 )
 from poms.reports.sql_builders.balance import BalanceReportBuilderSql
 from poms.reports.sql_builders.pl import PLReportBuilderSql
@@ -954,8 +955,8 @@ def transaction_report(
     )
 
 
-
 # PRICE HISTORY CHECK
+
 
 @strawberry.input
 class PriceHistoryCheckInput:
@@ -988,7 +989,7 @@ class PriceHistoryCheckInput:
 class PriceHistoryItem:
     id: int | None = None
     name: str | None = None
-    type: str # missing_principal_pricing_history
+    type: str  # missing_principal_pricing_history
     user_code: str | None = None
     position_size: float | None = None
     accounting_date: str
@@ -1006,11 +1007,11 @@ class PriceHistoryCheck:
 
 @strawberry.field
 def price_history_check(
-        self,
-        info,
-        input: PriceHistoryCheckInput,
-        limit: int = 50,
-        offset: int = 0,
+    self,
+    info,
+    input: PriceHistoryCheckInput,
+    limit: int = 50,
+    offset: int = 0,
 ) -> PriceHistoryCheck:
     user = info.context.request.user
 
@@ -1110,9 +1111,6 @@ def price_history_check(
     return PriceHistoryCheck(
         items=[from_dict(PriceHistoryItem, row) for row in items],
     )
-
-
-
 
 
 @strawberry.type
