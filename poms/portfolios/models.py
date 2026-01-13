@@ -59,7 +59,9 @@ class PortfolioClass(AbstractClassModel):
         verbose_name_plural = gettext_lazy("portfolio classes")
 
 
-class PortfolioType(NamedModel, FakeDeletableModel, TimeStampedModel, ConfigurationModel, ProvenanceModel):
+class PortfolioType(
+    NamedModel, FakeDeletableModel, TimeStampedModel, ConfigurationModel, ObjectStateModel, ProvenanceModel
+):
     """
     Meta Entity, part of Finmars Configuration
     Mostly used for extra fragmentation of Reports
@@ -463,7 +465,7 @@ class PortfolioRegister(NamedModel, FakeDeletableModel, TimeStampedModel, Object
         return f"Portfolio Register {self.portfolio.user_code}. Linked Instrument {self.linked_instrument}"
 
 
-class PortfolioRegisterRecord(TimeStampedModel, ComputedModel):
+class PortfolioRegisterRecord(TimeStampedModel, ComputedModel, ObjectStateModel, ProvenanceModel):
     """
     Portfolio Register RECORD
 
@@ -617,7 +619,7 @@ class PortfolioRegisterRecord(TimeStampedModel, ComputedModel):
         return f"{self.portfolio_register} {self.transaction_date} {self.transaction_class} {self.cash_amount}"
 
 
-class PortfolioBundle(NamedModel, TimeStampedModel, ObjectStateModel):
+class PortfolioBundle(NamedModel, TimeStampedModel, ObjectStateModel, ProvenanceModel):
     master_user = models.ForeignKey(
         MasterUser,
         related_name="portfolio_bundles",
@@ -638,7 +640,7 @@ class PortfolioBundle(NamedModel, TimeStampedModel, ObjectStateModel):
         index_together = [["master_user", "user_code"]]
 
 
-class PortfolioHistory(NamedModel, TimeStampedModel, ComputedModel):
+class PortfolioHistory(NamedModel, TimeStampedModel, ComputedModel, ObjectStateModel, ProvenanceModel):
     PERIOD_DAILY = "daily"
     PERIOD_YTD = "ytd"
     PERIOD_MTD = "mtd"
@@ -1015,7 +1017,7 @@ class PortfolioHistory(NamedModel, TimeStampedModel, ComputedModel):
         self.save()
 
 
-class PortfolioReconcileGroup(NamedModel, FakeDeletableModel, TimeStampedModel):
+class PortfolioReconcileGroup(NamedModel, FakeDeletableModel, TimeStampedModel, ObjectStateModel, ProvenanceModel):
     master_user = models.ForeignKey(
         MasterUser,
         related_name="portfolio_reconcile_groups",
@@ -1044,7 +1046,7 @@ class PortfolioReconcileGroup(NamedModel, FakeDeletableModel, TimeStampedModel):
         index_together = [["master_user", "user_code"]]
 
 
-class PortfolioReconcileHistory(NamedModel, TimeStampedModel, ComputedModel):
+class PortfolioReconcileHistory(NamedModel, TimeStampedModel, ComputedModel, ObjectStateModel, ProvenanceModel):
     STATUS_OK = "ok"
     STATUS_ERROR = "error"
 

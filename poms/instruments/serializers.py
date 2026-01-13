@@ -18,9 +18,9 @@ from poms.common.serializers import (
     PomsClassSerializer,
 )
 from poms.common.utils import date_now
-from poms.currencies.fields import CurrencyDefault
+from poms.currencies.fields import CurrencyDefault, CurrencyField
 from poms.currencies.models import CurrencyPricingPolicy
-from poms.currencies.serializers import CurrencyEvalSerializer, CurrencyField
+from poms.currencies.serializers.common import CurrencyEvalSerializer
 from poms.iam.serializers import ModelWithResourceGroupSerializer
 from poms.instruments.fields import (
     AUTO_CALCULATE,
@@ -387,6 +387,12 @@ class PricingPolicyViewSerializer(ModelWithUserCodeSerializer):
         fields = ["id", "user_code", "name", "short_name", "notes", "expr"]
 
 
+class PricingPolicyUserCodeOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PricingPolicy
+        fields = ["user_code"]
+
+
 class InstrumentTypePricingPolicySerializer(serializers.ModelSerializer):
     pricing_policy_id = serializers.IntegerField(read_only=False, required=True)
     pricing_policy = PricingPolicyLightSerializer(read_only=True)
@@ -485,6 +491,8 @@ class InstrumentTypeSerializer(
     ModelWithAttributesSerializer,
     ModelWithTimeStampSerializer,
     ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
     instrument_class_object = InstrumentClassSerializer(
@@ -1306,6 +1314,12 @@ class InstrumentSerializer(
         )
 
 
+class InstrumentUserCodeOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Instrument
+        fields = ["user_code"]
+
+
 class InstrumentLightSerializer(ModelWithUserCodeSerializer):
     master_user = MasterUserField()
 
@@ -1504,7 +1518,7 @@ class AccrualCalculationScheduleStandaloneSerializer(serializers.ModelSerializer
         return attrs
 
 
-class InstrumentFactorScheduleSerializer(ModelWithObjectStateSerializer):
+class InstrumentFactorScheduleSerializer(ModelWithObjectStateSerializer, ModelWithProvenanceSerializer):
     class Meta:
         model = InstrumentFactorSchedule
         fields = ["id", "effective_date", "factor_value"]
@@ -1640,6 +1654,36 @@ AUTOCALCULATE_ACTIONS = {
     "update",
     "partial_update",
 }
+
+
+class PriceHistoryLightSerializer(ModelMetaSerializer):
+    instrument_object = InstrumentUserCodeOnlySerializer(source="instrument", read_only=True)
+    pricing_policy_object = PricingPolicyUserCodeOnlySerializer(source="pricing_policy", read_only=True)
+    principal_price = FloatEvalField()
+    accrued_price = AutocalculateFloatEvalField()
+    procedure_modified_datetime = ReadOnlyField()
+    ytm = ReadOnlyField()
+
+    class Meta:
+        model = PriceHistory
+        fields = [
+            "id",
+            "instrument_object",
+            "pricing_policy_object",
+            "date",
+            "principal_price",
+            "accrued_price",
+            "procedure_modified_datetime",
+            "nav",
+            "cash_flow",
+            "factor",
+            "long_delta",
+            "short_delta",
+            "is_temporary_price",
+            "ytm",
+            "modified_duration",
+            "error_message",
+        ]
 
 
 class PriceHistorySerializer(ModelMetaSerializer, ModelWithObjectStateSerializer, ModelWithProvenanceSerializer):

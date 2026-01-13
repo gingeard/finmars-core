@@ -221,6 +221,7 @@ class BootstrapConfig(AppConfig):
 
         # TODO improve logic for Community Edition
         owner_username = settings.ADMIN_USERNAME
+        owner_password = settings.ADMIN_PASSWORD
         owner_email = os.environ.get("ADMIN_EMAIL", "admin@finmars.com")
         master_user_name = "Local"
         backend_status = None
@@ -285,13 +286,18 @@ class BootstrapConfig(AppConfig):
         # Non-Authorizer related bootstrap logic goes below
 
         try:
-            user, created = User.objects.using(settings.DB_DEFAULT).get_or_create(
-                username=owner_username,
-                defaults=dict(
+            user = User.objects.using(settings.DB_DEFAULT).filter(username=owner_username).first()
+            if user is None:
+                user = User.objects.db_manager(settings.DB_DEFAULT).create_user(
+                    username=owner_username,
                     email=owner_email,
-                    password=generate_random_string(10),
-                ),
-            )
+                    password=owner_password if owner_password else generate_random_string(10),
+                    is_staff=True,
+                    is_superuser=True,
+                )
+                created = True
+            else:
+                created = False
             _l.info(f"{log} owner {owner_username} {'created' if created else 'exists'}")
 
             user_profile, created = UserProfile.objects.using(settings.DB_DEFAULT).get_or_create(user_id=user.pk)

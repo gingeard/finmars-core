@@ -6,9 +6,11 @@ from poms.common.models import (
     EXPRESSION_FIELD_LENGTH,
     FakeDeletableModel,
     NamedModel,
+    ObjectStateModel,
     TimeStampedModel,
 )
 from poms.configuration.models import ConfigurationModel
+from poms.provenance.models import ProvenanceModel
 from poms.users.models import MasterUser
 
 ERROR_HANDLER_CHOICES = [
@@ -40,7 +42,9 @@ CLASSIFIER_HANDLER = [
 COLUMN_MATCHER_CHOICES = [["index", "Index"], ["name", "Name"]]
 
 
-class CsvImportScheme(NamedModel, TimeStampedModel, ConfigurationModel, FakeDeletableModel):
+class CsvImportScheme(
+    NamedModel, TimeStampedModel, ConfigurationModel, FakeDeletableModel, ObjectStateModel, ProvenanceModel
+):
     content_type = models.ForeignKey(
         ContentType,
         verbose_name=gettext_lazy("content type"),

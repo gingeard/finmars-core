@@ -17,7 +17,9 @@ from poms.provenance.models import ProvenanceModel
 from poms.users.models import MasterUser
 
 
-class AccountType(NamedModel, FakeDeletableModel, TimeStampedModel, ConfigurationModel, ProvenanceModel):
+class AccountType(
+    NamedModel, FakeDeletableModel, TimeStampedModel, ConfigurationModel, ObjectStateModel, ProvenanceModel
+):
     """
     Meta Entity, part of Finmars Configuration
     Mostly used for extra fragmentation of Reports

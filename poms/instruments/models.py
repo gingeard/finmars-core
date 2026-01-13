@@ -695,7 +695,9 @@ class PricingPolicy(NamedModel, TimeStampedModel, ConfigurationModel, ObjectStat
         base_manager_name = "objects"
 
 
-class InstrumentType(NamedModel, FakeDeletableModel, TimeStampedModel, ConfigurationModel, ProvenanceModel):
+class InstrumentType(
+    NamedModel, FakeDeletableModel, TimeStampedModel, ConfigurationModel, ObjectStateModel, ProvenanceModel
+):
     DIRECT_POSITION = 1
     FACTOR_ADJUSTED_POSITION = 2
     DO_NOT_SHOW = 3

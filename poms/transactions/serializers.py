@@ -16,6 +16,7 @@ from poms.common.fields import ExpressionField, name_validator
 from poms.common.models import EXPRESSION_FIELD_LENGTH
 from poms.common.serializers import (
     ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
     ModelWithTimeStampSerializer,
     ModelWithUserCodeSerializer,
     PomsClassSerializer,
@@ -2232,6 +2233,8 @@ class TransactionTypeSerializer(
     ModelWithAttributesSerializer,
     ModelWithTimeStampSerializer,
     ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
     group = TransactionTypeGroupField(
@@ -3446,7 +3449,7 @@ class TransactionSimpleSerializer(serializers.ModelSerializer):
         ]
 
 
-class TransactionSerializer(ModelWithProvenanceSerializer):
+class TransactionSerializer(ModelWithObjectStateSerializer, ModelWithProvenanceSerializer):
     master_user = MasterUserField()
     complex_transaction = serializers.PrimaryKeyRelatedField(read_only=True)
     complex_transaction_order = serializers.IntegerField(read_only=True)
@@ -3855,7 +3858,11 @@ def remove_user_fields_from_representation(data: dict) -> dict:
 
 
 class ComplexTransactionSerializer(
-    ModelWithAttributesSerializer, ModelWithTimeStampSerializer, ModelMetaSerializer, ModelWithProvenanceSerializer
+    ModelWithAttributesSerializer,
+    ModelWithTimeStampSerializer,
+    ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
     transaction_type = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -5301,7 +5308,7 @@ class TransactionEvalSerializer(serializers.ModelSerializer):
             CounterpartyEvalSerializer,
             ResponsibleEvalSerializer,
         )
-        from poms.currencies.serializers import CurrencyEvalSerializer
+        from poms.currencies.serializers.common import CurrencyEvalSerializer
         from poms.instruments.serializers import InstrumentEvalSerializer
         from poms.portfolios.serializers import PortfolioEvalSerializer
         from poms.strategies.serializers import (

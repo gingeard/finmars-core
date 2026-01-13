@@ -69,6 +69,8 @@ class PortfolioTypeSerializer(
     ModelWithAttributesSerializer,
     ModelWithTimeStampSerializer,
     ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
 
@@ -114,6 +116,7 @@ class PortfolioPortfolioRegisterSerializer(
     ModelWithUserCodeSerializer,
     ModelWithTimeStampSerializer,
     ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
 
@@ -604,6 +607,7 @@ class PortfolioBundleSerializer(
     ModelWithUserCodeSerializer,
     ModelWithTimeStampSerializer,
     ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
 ):
     master_user = MasterUserField()
 
@@ -880,7 +884,12 @@ class ReconcilePortfolioField(PortfolioField):
         return obj.user_code
 
 
-class PortfolioReconcileGroupSerializer(ModelWithUserCodeSerializer, ModelWithTimeStampSerializer):
+class PortfolioReconcileGroupSerializer(
+    ModelWithUserCodeSerializer,
+    ModelWithTimeStampSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
+):
     master_user = MasterUserField()
     params = ParamsSerializer()
     portfolios = serializers.ListSerializer(child=ReconcilePortfolioField(required=True))
@@ -946,7 +955,12 @@ HISTORY_FIELDS = [
 ]
 
 
-class PortfolioReconcileHistorySerializer(ModelWithUserCodeSerializer, ModelWithTimeStampSerializer):
+class PortfolioReconcileHistorySerializer(
+    ModelWithUserCodeSerializer,
+    ModelWithTimeStampSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
+):
     master_user = MasterUserField()
     portfolio_reconcile_group = serializers.CharField(source="portfolio_reconcile_group.user_code")
     portfolio_reconcile_group_object = PortfolioReconcileGroupSerializer(

@@ -650,7 +650,7 @@ class MemberSerializer(serializers.ModelSerializer):
         _l.info(f"member create {validated_data}")
 
         username = validated_data.get("username")
-        status = Member.STATUS_INVITED
+        status = self.context.get("member_status", Member.STATUS_INVITED)
         validated_data["status"] = status
 
         member = super().create(validated_data)

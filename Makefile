@@ -32,7 +32,7 @@ freeze: venv
 	$(PIP) freeze > requirements.txt
 
 tests:
-	$(COMPOSE) exec -i $(SERVICE) python manage.py test --keepdb
+	$(COMPOSE) exec -i $(SERVICE) python manage.py test --keepdb $(TEST)
 
 linters:
 	ruff format; \

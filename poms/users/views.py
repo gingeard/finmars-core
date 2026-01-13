@@ -873,10 +873,13 @@ class MemberViewSet(AbstractModelViewSet):
         return super().get_object()
 
     def create(self, request, *args, **kwargs):
+        member_status = Member.STATUS_INVITED
         if settings.EDITION_TYPE == "community":
-            raise PermissionDenied("Community edition does not support this feature")
+            member_status = Member.STATUS_ACTIVE
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data, context={**self.get_serializer_context(), "member_status": member_status}
+        )
         serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
@@ -885,12 +888,13 @@ class MemberViewSet(AbstractModelViewSet):
             member = serializer.instance
 
             try:
-                AuthorizerService().invite_member(
-                    member=member,
-                    from_user=request.user,
-                    realm_code=request.realm_code,
-                    space_code=request.space_code,
-                )
+                if settings.EDITION_TYPE == "entreprise":
+                    AuthorizerService().invite_member(
+                        member=member,
+                        from_user=request.user,
+                        realm_code=request.realm_code,
+                        space_code=request.space_code,
+                    )
                 headers = self.get_success_headers(serializer.data)
                 return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
             except Exception as err:
@@ -916,9 +920,6 @@ class MemberViewSet(AbstractModelViewSet):
         )
 
     def update(self, request, *args, **kwargs):
-        if settings.EDITION_TYPE == "community":
-            raise PermissionDenied("Community edition does not support this feature")
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -945,14 +946,15 @@ class MemberViewSet(AbstractModelViewSet):
             raise ValidationError("Could not remove admin rights from owner")
 
         if member.is_admin != form_data_is_admin or member.is_owner != form_data_is_owner:
-            authorizer = AuthorizerService()
-            authorizer.update_member(
-                member,
-                request.realm_code,
-                request.space_code,
-                is_admin=form_data_is_admin,
-                is_owner=form_data_is_owner,
-            )
+            if settings.EDITION_TYPE == "entreprise":
+                authorizer = AuthorizerService()
+                authorizer.update_member(
+                    member,
+                    request.realm_code,
+                    request.space_code,
+                    is_admin=form_data_is_admin,
+                    is_owner=form_data_is_owner,
+                )
 
         if not member.is_owner and form_data_is_owner is True:
             master_user = MasterUser.objects.get(space_code=kwargs["space_code"])
@@ -977,9 +979,6 @@ class MemberViewSet(AbstractModelViewSet):
             raise ValidationError("Could not remove owner rights from yourself")
 
     def destroy(self, request, *args, **kwargs):
-        if settings.EDITION_TYPE == "community":
-            raise PermissionDenied("Community edition does not support this feature")
-
         if self.get_object().username == "finmars_bot":
             raise PermissionDenied()
 
@@ -991,15 +990,12 @@ class MemberViewSet(AbstractModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance, request):
-        if settings.EDITION_TYPE == "community":
-            raise PermissionDenied("Community edition does not support this feature")
-
         if instance.is_owner:
             raise PermissionDenied()
 
-        authorizer = AuthorizerService()
-
-        authorizer.kick_member(instance, request.realm_code, request.space_code)
+        if settings.EDITION_TYPE == "entreprise":
+            authorizer = AuthorizerService()
+            authorizer.kick_member(instance, request.realm_code, request.space_code)
 
         instance.status = Member.STATUS_DELETED
         instance.save()
@@ -1008,9 +1004,6 @@ class MemberViewSet(AbstractModelViewSet):
 
     @action(detail=True, methods=["put"], url_path="send-invite")
     def send_invite(self, request, pk=None, realm_code=None, space_code=None):
-        if settings.EDITION_TYPE == "community":
-            raise PermissionDenied("Community edition does not support this feature")
-
         member = self.get_object()
 
         if not member.is_deleted and member.status != Member.STATUS_INVITE_DECLINED:
@@ -1019,14 +1012,15 @@ class MemberViewSet(AbstractModelViewSet):
         member.status = Member.STATUS_INVITED
         member.save()
 
-        authorizer = AuthorizerService()
+        if settings.EDITION_TYPE == "entreprise":
+            authorizer = AuthorizerService()
 
-        authorizer.invite_member(
-            member=member,
-            from_user=request.user,
-            realm_code=request.realm_code,
-            space_code=request.space_code,
-        )
+            authorizer.invite_member(
+                member=member,
+                from_user=request.user,
+                realm_code=request.realm_code,
+                space_code=request.space_code,
+            )
 
         return Response({"status": "ok"})
 

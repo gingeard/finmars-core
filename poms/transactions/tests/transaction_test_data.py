@@ -141,7 +141,22 @@ TRANSACTION_TYPE_DICT = {
     },
     "created_at": "20240823T16:41:00.0Z",
     "modified_at": "20240823T16:41:00.0Z",
+    "origin_initiator_code": None,
+    "origin_initiator_third_party_push_code": None,
+    "workflow_module_user_code": None,
+    "workflow_module_version_semantic": None,
+    "origin_initiator_type": None,
     "deleted_at": None,
+    "provider": None,
+    "provider_object": None,
+    "provider_version": None,
+    "provider_version_object": None,
+    "source": None,
+    "source_object": None,
+    "source_version": None,
+    "source_version_object": None,
+    "platform_version": None,
+    "platform_version_object": None,
 }
 
 TRANSACTION_TYPE_WITH_INPUTS_DICT = {

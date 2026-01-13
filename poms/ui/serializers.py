@@ -5,9 +5,11 @@ from rest_framework import serializers
 
 from poms.common.serializers import (
     ModelMetaSerializer,
+    ModelWithObjectStateSerializer,
     ModelWithTimeStampSerializer,
     ModelWithUserCodeSerializer,
 )
+from poms.provenance.serializers import ModelWithProvenanceSerializer
 from poms.ui.fields import LayoutContentTypeField, ListLayoutField
 from poms.ui.models import (
     Bookmark,
@@ -315,7 +317,12 @@ class ListLayoutLightSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeS
         ]
 
 
-class DashboardLayoutSerializer(ModelWithTimeStampSerializer, ModelWithUserCodeSerializer):
+class DashboardLayoutSerializer(
+    ModelWithTimeStampSerializer,
+    ModelWithUserCodeSerializer,
+    ModelWithObjectStateSerializer,
+    ModelWithProvenanceSerializer,
+):
     member = HiddenMemberField()
     data = serializers.JSONField(allow_null=False)
 

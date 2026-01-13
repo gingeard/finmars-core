@@ -723,12 +723,18 @@ class MasterUser(models.Model):
             owner=finmars_bot,
         )
 
-        from poms.provenance.models import Source
+        from poms.provenance.models import Source, SourceVersion
 
-        Source.objects.create(master_user=self, name="-", owner=finmars_bot)
-        from poms.provenance.models import Provider
+        source = Source.objects.create(master_user=self, name="-", owner=finmars_bot)
+        SourceVersion.objects.create(master_user=self, name="-", owner=finmars_bot, source=source)
 
-        Provider.objects.create(master_user=self, name="-", owner=finmars_bot)
+        from poms.provenance.models import PlatformVersion, Provider, ProviderVersion
+
+        provider = Provider.objects.create(master_user=self, name="-", owner=finmars_bot)
+        ProviderVersion.objects.create(master_user=self, name="-", owner=finmars_bot, provider=provider)
+
+        PlatformVersion.objects.create(master_user=self, name="-", owner=finmars_bot)
+
         from poms.clients.models import Client
 
         Client.objects.create(
