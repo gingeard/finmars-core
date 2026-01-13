@@ -50,10 +50,11 @@ from poms.reports.common import TransactionReport as TransactionReportModel
 from poms.reports.serializers_helpers import (
     serialize_balance_report_item,
     serialize_pl_report_item,
-    serialize_transaction_report_item,
+    serialize_transaction_report_item, serialize_price_checker_item,
 )
 from poms.reports.sql_builders.balance import BalanceReportBuilderSql
 from poms.reports.sql_builders.pl import PLReportBuilderSql
+from poms.reports.sql_builders.price_checkers import PriceHistoryCheckerSql
 from poms.reports.sql_builders.transaction import TransactionReportBuilderSql
 from poms.strategies.models import Strategy1 as Strategy1Model
 from poms.strategies.models import Strategy2 as Strategy2Model
@@ -953,6 +954,167 @@ def transaction_report(
     )
 
 
+
+# PRICE HISTORY CHECK
+
+@strawberry.input
+class PriceHistoryCheckInput:
+    pl_first_date: date | None = None
+    report_date: date
+    report_currency: str = "USD"
+    period_type: str | None = None  # daily, mtd, qtd, ytd, inception
+
+    pricing_policy: str | None = None
+    calculate_pl: bool = False
+    cost_method: str = "avco"  # avco or fifo
+    expression_iterations_count: int = 1
+    custom_fields_to_calculate: str = ""
+    calculation_group: str = "portfolio.id"
+
+    portfolios: list[str] | None = None
+    accounts: list[str] | None = None
+    strategies1: list[str] | None = None
+    strategies2: list[str] | None = None
+    strategies3: list[str] | None = None
+
+    portfolio_mode: str = "independent"
+    account_mode: str = "independent"
+    strategy1_mode: str = "independent"
+    strategy2_mode: str = "independent"
+    strategy3_mode: str = "independent"
+
+
+@strawberry.type
+class PriceHistoryItem:
+    id: int | None = None
+    name: str | None = None
+    type: str # missing_principal_pricing_history
+    user_code: str | None = None
+    position_size: float | None = None
+    accounting_date: str
+    transaction_currency_id: int | None = None
+    transaction_currency_name: str | None = None
+    transaction_currency_user_code: str | None = None
+    settlement_currency_name: str | None = None
+    settlement_currency_user_code: str | None = None
+
+
+@strawberry.type
+class PriceHistoryCheck:
+    items: list[PriceHistoryItem]
+
+
+@strawberry.field
+def price_history_check(
+        self,
+        info,
+        input: PriceHistoryCheckInput,
+        limit: int = 50,
+        offset: int = 0,
+) -> PriceHistoryCheck:
+    user = info.context.request.user
+
+    report_currency = CurrencyModel.objects.get(user_code=input.report_currency)
+    pricing_policy = PricingPolicyModel.objects.get(user_code=input.pricing_policy)
+
+    portfolios = []
+
+    if input.portfolios:
+        portfolios = PortfolioModel.objects.filter(user_code__in=input.portfolios)
+
+    accounts = []
+
+    if input.accounts:
+        accounts = AccountModel.objects.filter(user_code__in=input.accounts)
+
+    strategies1 = []
+
+    if input.strategies1:
+        strategies1 = Strategy1Model.objects.filter(user_code__in=input.strategies1)
+
+    strategies2 = []
+
+    if input.strategies2:
+        strategies2 = Strategy2Model.objects.filter(user_code__in=input.strategies2)
+
+    strategies3 = []
+
+    if input.strategies3:
+        strategies3 = Strategy3Model.objects.filter(user_code__in=input.strategies3)
+
+    cost_method = CostMethodModel.objects.get(user_code="avco")
+
+    if input.cost_method == "fifo":
+        cost_method = CostMethodModel.objects.get(user_code="fifo")
+
+    portfolio_mode = 1
+
+    if input.portfolio_mode == "ignore":
+        portfolio_mode = 0
+
+    account_mode = 1
+
+    if input.account_mode == "ignore":
+        account_mode = 0
+
+    strategy1_mode = 1
+
+    if input.strategy1_mode == "ignore":
+        strategy1_mode = 0
+
+    strategy2_mode = 1
+
+    if input.strategy2_mode == "ignore":
+        strategy2_mode = 0
+
+    strategy3_mode = 1
+
+    if input.strategy3_mode == "ignore":
+        strategy3_mode = 0
+
+    report = ReportModel(
+        master_user=user.master_user,
+        member=user.member,
+        calculate_pl=input.calculate_pl,
+        cost_method=cost_method,
+        custom_fields_to_calculate=input.custom_fields_to_calculate,
+        calculation_group=input.calculation_group,
+        report_date=input.report_date,
+        pl_first_date=input.pl_first_date,
+        period_type=input.period_type,
+        pricing_policy=pricing_policy,
+        report_currency=report_currency,
+        portfolio_mode=portfolio_mode,
+        account_mode=account_mode,
+        strategy1_mode=strategy1_mode,
+        strategy2_mode=strategy2_mode,
+        strategy3_mode=strategy3_mode,
+        portfolios=portfolios,
+        accounts=accounts,
+        strategies1=strategies1,
+        strategies2=strategies2,
+        strategies3=strategies3,
+    )
+
+    builder = PriceHistoryCheckerSql(instance=report)
+    instance = builder.process()
+
+    items = []
+
+    for item in instance.items:
+        items.append(serialize_price_checker_item(item))
+
+    # _l.info('report.items %s' % items[0])
+
+    # 3) map result to GraphQL types
+    return PriceHistoryCheck(
+        items=[from_dict(PriceHistoryItem, row) for row in items],
+    )
+
+
+
+
+
 @strawberry.type
 class Query:
     account: list[Account] = strawberry_django.field(
@@ -1043,6 +1205,7 @@ class Query:
     pl_report: PLReport = pl_report
     performance_report: PerformanceReport = performance_report
     transaction_report: TransactionReport = transaction_report
+    price_history_check: PriceHistoryCheck = price_history_check
 
 
 schema = strawberry.Schema(
