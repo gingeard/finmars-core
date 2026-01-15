@@ -34,6 +34,25 @@ from poms.graphql.filters import (
     Strategy3Filter,
     TransactionFilter,
 )
+from poms.graphql.orderings import (
+    AccountOrdering,
+    AccountTypeOrdering,
+    ComplexTransactionOrdering,
+    CounterpartyOrdering,
+    CurrencyHistoryOrdering,
+    CurrencyOrdering,
+    InstrumentOrdering,
+    InstrumentTypeOrdering,
+    PortfolioHistoryOrdering,
+    PortfolioOrdering,
+    PriceHistoryOrdering,
+    PricingPolicyOrdering,
+    ResponsibleOrdering,
+    Strategy1Ordering,
+    Strategy2Ordering,
+    Strategy3Ordering,
+    TransactionOrdering,
+)
 from poms.instruments.models import CostMethod as CostMethodModel
 from poms.instruments.models import Country as CountryModel
 from poms.instruments.models import Instrument as InstrumentModel
@@ -1117,85 +1136,102 @@ def price_history_check(
 class Query:
     account: list[Account] = strawberry_django.field(
         filters=AccountFilter,
+        order=AccountOrdering,
         pagination=True,
     )
     account_type: list[AccountType] = strawberry_django.field(
         filters=AccountTypeFilter,
+        order=AccountTypeOrdering,
         pagination=True,
     )
 
     currency: list[Currency] = strawberry_django.field(
         filters=CurrencyFilter,
+        order=CurrencyOrdering,
         pagination=True,
     )
 
     currency_history: list[CurrencyHistory] = strawberry_django.field(
         filters=CurrencyHistoryFilter,
+        order=CurrencyHistoryOrdering,
         pagination=True,
     )
 
     portfolio: list[Portfolio] = strawberry_django.field(
         filters=PortfolioFilter,
+        order=PortfolioOrdering,
         pagination=True,
     )
 
     portfolio_history: list[PortfolioHistory] = strawberry_django.field(
         filters=PortfolioHistoryFilter,
+        order=PortfolioHistoryOrdering,
         pagination=True,
     )
 
     instrument_type: list[InstrumentType] = strawberry_django.field(
         filters=InstrumentTypeFilter,
+        order=InstrumentTypeOrdering,
         pagination=True,
     )
 
     instrument: list[Instrument] = strawberry_django.field(
         filters=InstrumentFilter,
+        order=InstrumentOrdering,
         pagination=True,
     )
 
     pricing_policy: list[PricingPolicy] = strawberry_django.field(
         filters=PricingPolicyFilter,
+        order=PricingPolicyOrdering,
         pagination=True,
     )
 
     price_history: list[PriceHistory] = strawberry_django.field(
         filters=PriceHistoryFilter,
+        order=PriceHistoryOrdering,
         pagination=True,
     )
 
     responsible: list[Responsible] = strawberry_django.field(
         filters=ResponsibleFilter,
+        order=ResponsibleOrdering,
         pagination=True,
     )
 
     counterparty: list[Counterparty] = strawberry_django.field(
         filters=CounterpartyFilter,
+        order=CounterpartyOrdering,
         pagination=True,
     )
 
     strategy1: list[Strategy1] = strawberry_django.field(
         filters=Strategy1Filter,
+        order=Strategy1Ordering,
         pagination=True,
     )
 
-    strategy2: list[Strategy1] = strawberry_django.field(
+    strategy2: list[Strategy2] = strawberry_django.field(
         filters=Strategy2Filter,
+        order=Strategy2Ordering,
         pagination=True,
     )
 
-    strategy3: list[Strategy1] = strawberry_django.field(
+    strategy3: list[Strategy3] = strawberry_django.field(
         filters=Strategy3Filter,
+        order=Strategy3Ordering,
         pagination=True,
     )
 
     complex_transaction: list[ComplexTransaction] = strawberry_django.field(
         filters=ComplexTransactionFilter,
+        order=ComplexTransactionOrdering,
         pagination=True,
     )
 
     transaction: list[Transaction] = strawberry_django.field(
         filters=TransactionFilter,
+        order=TransactionOrdering,
         pagination=True,
     )
 
