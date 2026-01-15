@@ -1005,13 +1005,13 @@ class PriceHistoryCheckInput:
 
 
 @strawberry.type
-class PriceHistoryItem:
+class PriceHistoryCheckItem:
     id: int | None = None
     name: str | None = None
     type: str  # missing_principal_pricing_history
     user_code: str | None = None
     position_size: float | None = None
-    accounting_date: str
+    accounting_date: str | None = None
     transaction_currency_id: int | None = None
     transaction_currency_name: str | None = None
     transaction_currency_user_code: str | None = None
@@ -1021,7 +1021,7 @@ class PriceHistoryItem:
 
 @strawberry.type
 class PriceHistoryCheck:
-    items: list[PriceHistoryItem]
+    items: list[PriceHistoryCheckItem]
 
 
 @strawberry.field
@@ -1128,7 +1128,7 @@ def price_history_check(
 
     # 3) map result to GraphQL types
     return PriceHistoryCheck(
-        items=[from_dict(PriceHistoryItem, row) for row in items],
+        items=[from_dict(PriceHistoryCheckItem, row) for row in items],
     )
 
 
