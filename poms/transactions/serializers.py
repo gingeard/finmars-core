@@ -3868,7 +3868,7 @@ class ComplexTransactionSerializer(
     transaction_type = serializers.PrimaryKeyRelatedField(read_only=True)
     transactions = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     recon_fields = ReconciliationComplexTransactionFieldSerializer(required=False, many=True)
-    source = serializers.JSONField(read_only=True, allow_null=True)
+    # source = serializers.JSONField(read_only=True, allow_null=True)
     inputs = ComplexTransactionInputSerializer(many=True)
 
     def __init__(self, *args, **kwargs):
@@ -3952,7 +3952,7 @@ class ComplexTransactionSerializer(
             "user_date_5",
             "recon_fields",
             "execution_log",
-            "source",
+            "source_data",
             "inputs",
         ]
 

@@ -140,7 +140,7 @@ class TransactionTypeProcess:
         self.complex_transaction_status = complex_transaction_status
         self.transactions_errors = transactions_errors or []
         self.recalculate_inputs = recalculate_inputs or []
-        self.source = source  # JSON object that contains source dictionary from broker
+        self.source_data_dict = source  # JSON object that contains source dictionary from broker
         self.uniqueness_reaction = uniqueness_reaction or (self.transaction_type.transaction_unique_code_options)
         self._now = now or date_now()
         self.next_transaction_order = transaction_order_gen or self._next_transaction_order_default
@@ -2926,8 +2926,8 @@ class TransactionTypeProcess:
         if self.complex_transaction_status is not None:
             self.complex_transaction.status_id = self.complex_transaction_status
 
-        if self.source:
-            self.complex_transaction.source = self.source
+        if self.source_data_dict:
+            self.complex_transaction.source_data_dict = self.source_data_dict
 
         if self.complex_transaction.transaction_unique_code:
             count = (
