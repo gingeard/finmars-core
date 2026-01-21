@@ -229,7 +229,7 @@ def set_defaults_from_instrument_type(instrument_object, instrument_type, ecosys
                     attr["classifier"] = item.id
                     attr["classifier_object"] = {"id": item.id, "name": item.name}
                 except Exception as e:
-                    _l.error(f"set_defaults_from_instrument_type {e}")
+                    _l.warning(f"set_defaults_from_instrument_type {e}")
 
                     attr["classifier"] = None
 
