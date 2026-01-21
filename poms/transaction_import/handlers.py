@@ -518,7 +518,7 @@ class TransactionImportProcess:
                         errors = errors + transaction_type_process_instance.general_errors
 
                     item.status = "skip"
-                    item.message = "Transaction Skipped %s", json.dumps(errors, default=str)
+                    item.message = f"Transaction Skipped {json.dumps(errors, default=str)}"
 
                     self.task.update_progress(
                         {
@@ -551,7 +551,14 @@ class TransactionImportProcess:
                     if transaction_type_process_instance.transactions_errors:
                         errors = errors + transaction_type_process_instance.transactions_errors
 
-                    item.error_message = item.error_message + " Book Exception: " + json.dumps(errors, default=str)
+                    if not item.error_message:
+                        item.error_message = ""
+
+                    try:
+                        item.error_message = item.error_message + " Book Exception: " + json.dumps(errors, default=str)
+                    except Exception as e:
+                        _l.warning(f"error_messages_creation_error: {e}")
+                        item.error_message = f"Could not create error messages due to {e}"
 
                     raise BookException(code=400, error_message=item.error_message)
 

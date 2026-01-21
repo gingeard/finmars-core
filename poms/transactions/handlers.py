@@ -49,7 +49,7 @@ from poms.transactions.models import (
     TransactionTypeInput,
 )
 from poms.transactions.utils import _read_json_text, generate_user_fields
-from poms.users.models import EcosystemDefault
+from poms.users.models import EcosystemDefault, Member
 from poms.vault.models import VaultRecord
 
 _l = logging.getLogger("poms.transactions")
@@ -120,7 +120,25 @@ class TransactionTypeProcess:
         )
 
         master_user = transaction_type.master_user
+        finmars_bot = Member.objects.get(username="finmars_bot")
         self.ecosystem_default = EcosystemDefault.cache.get_cache(master_user_pk=master_user.pk)
+
+        # Probably need to fix it later
+        self.default_provider, _ = Provider.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-"
+        )
+        self.default_provider_version, _ = ProviderVersion.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-", provider=self.default_provider
+        )
+        self.default_source, _ = Source.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-"
+        )
+        self.default_source_version, _ = SourceVersion.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-", source=self.default_source
+        )
+        self.default_platform_version, _ = PlatformVersion.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-"
+        )
 
         self.member = member
         self.transaction_type = transaction_type
@@ -823,6 +841,7 @@ class TransactionTypeProcess:
                         self._set_rel(
                             errors=errors,
                             values=self.values,
+                            default_value=self.default_provider,
                             model=Provider,
                             target=instrument,
                             target_attr_name="provider",
@@ -834,6 +853,7 @@ class TransactionTypeProcess:
                         self._set_rel(
                             errors=errors,
                             values=self.values,
+                            default_value=self.default_provider_version,
                             model=ProviderVersion,
                             target=instrument,
                             target_attr_name="provider_version",
@@ -845,6 +865,7 @@ class TransactionTypeProcess:
                         self._set_rel(
                             errors=errors,
                             values=self.values,
+                            default_value=self.default_source,
                             model=Source,
                             target=instrument,
                             target_attr_name="source",
@@ -856,6 +877,7 @@ class TransactionTypeProcess:
                         self._set_rel(
                             errors=errors,
                             values=self.values,
+                            default_value=self.default_source_version,
                             model=SourceVersion,
                             target=instrument,
                             target_attr_name="source_version",
@@ -867,6 +889,7 @@ class TransactionTypeProcess:
                         self._set_rel(
                             errors=errors,
                             values=self.values,
+                            default_value=self.default_platform_version,
                             model=PlatformVersion,
                             target=instrument,
                             target_attr_name="platform_version",
@@ -2249,7 +2272,7 @@ class TransactionTypeProcess:
                 self._set_rel(
                     errors=errors,
                     values=self.values,
-                    default_value=None,
+                    default_value=self.default_provider,
                     model=Provider,
                     target=transaction,
                     target_attr_name="provider",
@@ -2260,7 +2283,7 @@ class TransactionTypeProcess:
                 self._set_rel(
                     errors=errors,
                     values=self.values,
-                    default_value=None,
+                    default_value=self.default_provider_version,
                     model=ProviderVersion,
                     target=transaction,
                     target_attr_name="provider_version",
@@ -2271,7 +2294,7 @@ class TransactionTypeProcess:
                 self._set_rel(
                     errors=errors,
                     values=self.values,
-                    default_value=None,
+                    default_value=self.default_source,
                     model=Source,
                     target=transaction,
                     target_attr_name="source",
@@ -2282,7 +2305,7 @@ class TransactionTypeProcess:
                 self._set_rel(
                     errors=errors,
                     values=self.values,
-                    default_value=None,
+                    default_value=self.default_source_version,
                     model=SourceVersion,
                     target=transaction,
                     target_attr_name="source_version",
@@ -2293,7 +2316,7 @@ class TransactionTypeProcess:
                 self._set_rel(
                     errors=errors,
                     values=self.values,
-                    default_value=None,
+                    default_value=self.default_platform_version,
                     model=PlatformVersion,
                     target=transaction,
                     target_attr_name="platform_version",
