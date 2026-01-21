@@ -2798,18 +2798,18 @@ class ComplexTransaction(TimeStampedModel, ObjectStateModel, ProvenanceModel):
         blank=True,
         verbose_name=gettext_lazy("execution log"),
     )
-    source_data = models.TextField(
+    source_data = models.JSONField(
         null=True,
         blank=True,
         verbose_name=gettext_lazy("source data"),
     )
 
     @property
-    def source(self):
+    def source_data_dict(self):
         return None if self.source_data is None else json.loads(self.source_data)
 
-    @source.setter
-    def source(self, value):
+    @source_data_dict.setter
+    def source_data_dict(self, value):
         if value is None:
             self.source_data = None
         else:
