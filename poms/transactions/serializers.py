@@ -4650,7 +4650,7 @@ class TransactionTypeComplexTransactionSerializer(ModelWithAttributesSerializer)
         read_only=True,
         many=True,
     )
-    source = serializers.JSONField(read_only=True)
+    source_data = serializers.JSONField(read_only=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -4734,7 +4734,7 @@ class TransactionTypeComplexTransactionSerializer(ModelWithAttributesSerializer)
             "user_date_5",
             "recon_fields",
             "execution_log",
-            "source",
+            "source_data",
         ]
 
     def to_representation(self, instance):
