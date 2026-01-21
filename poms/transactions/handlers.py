@@ -124,11 +124,21 @@ class TransactionTypeProcess:
         self.ecosystem_default = EcosystemDefault.cache.get_cache(master_user_pk=master_user.pk)
 
         # Probably need to fix it later
-        self.default_provider, _ = Provider.objects.get_or_create(master_user=master_user, owner=finmars_bot, name="-", user_code="-")
-        self.default_provider_version, _ = ProviderVersion.objects.get_or_create(master_user=master_user, owner=finmars_bot, name="-",  user_code="-", provider=self.default_provider)
-        self.default_source, _ = Source.objects.get_or_create(master_user=master_user, owner=finmars_bot, name="-", user_code="-")
-        self.default_source_version, _ = SourceVersion.objects.get_or_create(master_user=master_user, owner=finmars_bot,name="-",  user_code="-", source=self.default_source)
-        self.default_platform_version, _ = PlatformVersion.objects.get_or_create(master_user=master_user, owner=finmars_bot, name="-", user_code="-")
+        self.default_provider, _ = Provider.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-"
+        )
+        self.default_provider_version, _ = ProviderVersion.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-", provider=self.default_provider
+        )
+        self.default_source, _ = Source.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-"
+        )
+        self.default_source_version, _ = SourceVersion.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-", source=self.default_source
+        )
+        self.default_platform_version, _ = PlatformVersion.objects.get_or_create(
+            master_user=master_user, owner=finmars_bot, name="-", user_code="-"
+        )
 
         self.member = member
         self.transaction_type = transaction_type
